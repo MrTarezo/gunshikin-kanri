@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "gunshikinkanri",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authgunshikinkanri3c4502f1",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

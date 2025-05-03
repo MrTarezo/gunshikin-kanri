@@ -1,0 +1,18 @@
+type Expense @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  title: String!
+  amount: Float!
+  paidBy: String!
+  comment: String
+  date: AWSDate!
+  type: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  receipt: Receipt @hasOne
+}
+
+type Receipt @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  imageKey: String!
+  uploadedAt: AWSDateTime!
+}

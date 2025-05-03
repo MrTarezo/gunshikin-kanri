@@ -1,0 +1,14 @@
+{
+  "resourceName": "imageUpload",
+  "policyUUID": "da44cdac",
+  "bucketName": "gunshikinkanri7476f81c11dd43888e3f660a0f6b9d7a",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}
