@@ -117,7 +117,7 @@ export default function Home() {
           <li key={item.id}>
             {item.date} | {item.type === 'income' ? '【収入】' : '【支出】'} | {item.title} | {item.amount}円 | 入力者: {item.paidBy}
             <button onClick={() => handleDelete(item.id)}>削除</button>
-            <button onClick={() => {
+            <button className="edit-button" onClick={() => {
               setEditItem(item);
               setIsEditModalOpen(true);
             }}>編集</button>

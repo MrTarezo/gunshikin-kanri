@@ -8,6 +8,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import AddRecord from './pages/AddRecord';
 import Home from './pages/Home';
 
+import './App.css'; // 👈 ここ重要！
+
 Amplify.configure(awsconfig);
 
 function App() {
@@ -16,8 +18,8 @@ function App() {
   useEffect(() => {
     const loadNickname = async () => {
       try {
-        await getCurrentUser(); // セッション確認
-        const attributes = await fetchUserAttributes(); // ← 正しい関数名
+        await getCurrentUser();
+        const attributes = await fetchUserAttributes();
         setNickname(attributes.nickname || '名無し');
       } catch (err) {
         console.error('ニックネーム取得失敗:', err);
@@ -32,19 +34,25 @@ function App() {
     <Authenticator>
       {({ signOut }) => (
         <Router>
-          <div>
-            <h1>軍資金投入記録・支払原資紐付管理簿</h1>
-            <p>ようこそ、{nickname}</p>
-            <button onClick={signOut}>サインアウト</button>
+          <div className="app-container">
+            <header className="app-header">
+              <h1>💰💰 軍資金投入記録💰💰</h1>
+              <p>ようこそ、<strong>{nickname}</strong> さん</p>
+              <button onClick={signOut}>サインアウト</button>
+            </header>
 
-            <nav>
-              <Link to="/">記録一覧</Link> | <Link to="/add">新規登録</Link>
+            <nav className="app-nav">
+              <Link to="/">📋 記録一覧</Link>
+              <span> | </span>
+              <Link to="/add">➕ 新規登録</Link>
             </nav>
 
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/add" element={<AddRecord nickname={nickname} />} />
-            </Routes>
+            <main className="app-main">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/add" element={<AddRecord nickname={nickname} />} />
+              </Routes>
+            </main>
           </div>
         </Router>
       )}
