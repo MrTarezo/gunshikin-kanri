@@ -1,4 +1,3 @@
-// src/components/MonthlyChart.jsx
 import {
   BarChart,
   Bar,
@@ -9,7 +8,6 @@ import {
   CartesianGrid,
   Legend,
   Line,
-  LineChart,
   ComposedChart,
 } from 'recharts';
 
@@ -20,13 +18,16 @@ export default function MonthlyChart({ expenses }) {
   expenses.forEach((item) => {
     const month = item.date.slice(0, 7); // "YYYY-MM"
     if (!monthlyMap[month]) {
-      monthlyMap[month] = { month, income: 0, expense: 0 };
+      monthlyMap[month] = { month, income: 0, expense: {} }; // 支出を入力者別に管理
     }
 
     if (item.type === 'income') {
       monthlyMap[month].income += item.amount;
     } else {
-      monthlyMap[month].expense += item.amount;
+      if (!monthlyMap[month].expense[item.paidBy]) {
+        monthlyMap[month].expense[item.paidBy] = 0;
+      }
+      monthlyMap[month].expense[item.paidBy] += item.amount;
     }
   });
 
@@ -35,7 +36,7 @@ export default function MonthlyChart({ expenses }) {
   let cumulative = 0;
   const chartData = sortedMonths.map((month) => {
     const { income, expense } = monthlyMap[month];
-    const net = income - expense;
+    const net = income - Object.values(expense).reduce((a, b) => a + b, 0);
     cumulative += net;
     return {
       month,
@@ -44,6 +45,12 @@ export default function MonthlyChart({ expenses }) {
       balance: cumulative,
     };
   });
+
+  // 支出者別の色
+  const expenseColors = {
+    "チマエフ": "#e74c3c",  // チマエフの支出：赤
+    "おもち軍曹": "#f39c12"// おもち軍曹の支出：薄い赤
+  };
 
   return (
     <div style={{ width: '100%', height: 350 }}>
@@ -55,9 +62,30 @@ export default function MonthlyChart({ expenses }) {
           <YAxis />
           <Tooltip />
           <Legend />
+          {/* 収入は重ねず単独の棒グラフ */}
           <Bar dataKey="income" fill="#82ca9d" name="収入" />
-          <Bar dataKey="expense" fill="#f08080" name="支出" />
-          <Line type="monotone" dataKey="balance" stroke="#8884d8" name="貯金残高" />
+          {/* チマエフの支出 */}
+          <Bar 
+            dataKey="expense.チマエフ" 
+            fill={expenseColors["チマエフ"]} 
+            name="支出（チマエフ）"
+            stroke="#ff6666"
+            strokeWidth={2}
+            fillOpacity={0.7}
+            stackId="a" // チマエフの支出を重ねて表示
+          />
+          {/* おもち軍曹の支出 */}
+          <Bar 
+            dataKey="expense.おもち軍曹" 
+            fill={expenseColors["おもち軍曹"]} 
+            name="支出（おもち軍曹）" 
+            stroke="#ffcccc"
+            strokeWidth={2}
+            fillOpacity={0.7}
+            stackId="a" // おもち軍曹の支出を重ねて表示
+            strokeDasharray="5 5"  // 点線の効果
+          />
+          <Line type="monotone" dataKey="balance" stroke="#8884d8" name="余剰金" />
         </ComposedChart>
       </ResponsiveContainer>
     </div>

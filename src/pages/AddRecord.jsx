@@ -22,7 +22,7 @@ function AddRecord({ nickname }) {
       if (file) {
         // ファイル名をURLエンコード（スペース・日本語対策）
         const encodedFileName = encodeURIComponent(file.name);
-        const path = `receipts/${encodedFileName}`;
+        const path = 'receipts/${encodedFileName}';
 
         const result = await uploadData({
           path,

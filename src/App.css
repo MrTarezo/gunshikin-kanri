@@ -2,7 +2,7 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(135deg, #f0f4ff, #ffffff);
+  background: linear-gradient(135deg, white, #ffffff);
   color: #333;
 }
 
@@ -64,18 +64,76 @@ button:hover {
   background-color: #e65b50;
 }
 
-/* リストスタイル */
-ul {
-  list-style: none;
-  padding: 0;
+/* 編集ボタン専用スタイル */
+button.edit-button {
+  background-color: #333;
+  color: #fff;
 }
 
-li {
-  background-color: #ffffff;
-  margin-bottom: 0.5rem;
-  padding: 0.8rem;
-  border-radius: 8px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+button.edit-button:hover {
+  background-color: #000;
+}
+
+/* モーダルスタイル */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal img {
+  max-width: 80%;
+  max-height: 80%;
+}
+
+/* テーブル */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 3px;  /* 高さを少し小さくして、行をコンパクトに */
+  text-align: left;
+  border: 1px solid black;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+/* 編集・削除ボタン専用 */
+button.edit-button, button.delete-button {
+  padding: 6px 12px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+button.edit-button {
+  background-color: black;
+}
+
+button.delete-button {
+  background-color: #f44336;
+}
+
+button.edit-button:hover, button.delete-button:hover {
+  opacity: 0.8;
+}
+
+/* 収入・自腹で色分け */
+td[data-type="expense"] {
+  background-color: #ffcccc; /* 自腹を薄い赤 */
+}
+
+td[data-type="income"] {
+  background-color: #ccffcc; /* 収入を薄い緑 */
 }
 
 /* メディアクエリ（スマホ対応） */
@@ -92,29 +150,11 @@ li {
   nav a {
     width: 100%;
     text-align: center;
+    padding: 0.8rem; /* ボタンを広めにしてクリックしやすく */
   }
-}
-/* 編集ボタン専用スタイル */
-button.edit-button {
-  background-color: #333;
-  color: #fff;
-}
 
-button.edit-button:hover {
-  background-color: #000;
-}
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.modal img {
-  max-width: 90%;
-  max-height: 90%;
+  /* テーブルの高さをさらに調整 */
+  th, td {
+    padding: 6px;  /* スマホではさらにコンパクトに */
+  }
 }
