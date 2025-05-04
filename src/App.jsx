@@ -9,7 +9,7 @@ import AddRecord from './pages/AddRecord';
 import Home from './pages/Home';
 import Modal from 'react-modal';
 Modal.setAppElement('#root');
-import './App.css'; // 👈 ここ重要！
+import './App.css';
 
 Amplify.configure(awsconfig);
 
@@ -37,15 +37,15 @@ function App() {
         <Router>
           <div className="app-container">
             <header className="app-header">
-              <h1>💰💰 軍資金投入記録💰💰</h1>
-              <p>ようこそ、<strong>{nickname}</strong> さん</p>
-              <button onClick={signOut}>サインアウト</button>
+              <h1>💰軍資金💰</h1>
+              <h1>投入記録・支払原資紐付管理簿</h1>
+              <p>ようこそ、<strong>”{nickname}”</strong>さん
+              <button onClick={signOut}>サインアウト</button></p>
             </header>
 
             <nav className="app-nav">
-              <Link to="/">📋 記録一覧</Link>
-              <span> | </span>
-              <Link to="/add">➕ 新規登録</Link>
+            <Link to="/add">➕ 新規登録 ➕</Link>
+              <Link to="/">📋 記録一覧 📋</Link>
             </nav>
 
             <main className="app-main">

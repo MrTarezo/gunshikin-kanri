@@ -107,8 +107,7 @@ export default function Home() {
 
   return (
     <div>
-      <h2>登録済みの記録一覧</h2>
-
+      <h2> 🔹登録済みの支出一覧表</h2>
       <Filters
         filter={filter}
         setFilter={setFilter}

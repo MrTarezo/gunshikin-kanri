@@ -36,7 +36,7 @@ export default function EditModal({ editItem, onClose, onChange, onSubmit }) {
             value={editItem.type}
             onChange={(e) => handleChange('type', e.target.value)}
           >
-            <option value="expense">支出</option>
+            <option value="expense">自腹</option>
             <option value="income">収入</option>
           </select>
           <div style={{ marginTop: '1rem' }}>

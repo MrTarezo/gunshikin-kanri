@@ -4,157 +4,179 @@ body {
   font-family: 'Segoe UI', Roboto, sans-serif;
   background: linear-gradient(135deg, white, #ffffff);
   color: #333;
+  font-size: 0.8rem; /* 全体的なフォントサイズを小さく */
 }
 
-#root {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-/* タイトル */
-h1 {
-  font-size: 1.8rem;
-  color: #4a90e2;
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
-
-/* ニックネーム表示 */
-p {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-/* ナビゲーション */
-nav {
+/* ヘッダー */
+.app-header {
   display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  justify-content: space-between; /* 左右に広げる */
+  align-items: center; /* 中央に配置 */
+  margin: auto;
+  font-size: 1.2rem;
+  flex-wrap: wrap; /* 複数行に折り返す */
+  width: 100%; /* ヘッダー全体に幅を設定 */
+  padding: 0 10px; /* 横の余白調整 */
+  box-sizing: border-box; /* パディングを含めてボックスサイズを計算 */
 }
 
-nav a {
-  text-decoration: none;
-  color: #fff;
-  background-color: #4a90e2;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: background-color 0.3s;
-}
-
-nav a:hover {
-  background-color: #357ab8;
-}
-
-/* ボタン共通 */
-button {
+/* サインアウトボタン */
+.app-header button {
   background-color: #ff6f61;
   color: white;
   border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
+  padding: 0.4rem 1.5rem;
+  font-size: 1rem;
+  margin: 0;
+  border-radius: 8px;
   cursor: pointer;
-  margin: 0.2rem;
   transition: background-color 0.2s;
+  order: 2; /* ボタンを右端に配置 */
 }
 
-button:hover {
+.app-header button:hover {
   background-color: #e65b50;
 }
 
-/* 編集ボタン専用スタイル */
-button.edit-button {
-  background-color: #333;
-  color: #fff;
+.app-header h1 {
+  font-size: 1.5rem; /* タイトルのフォントサイズ */
+  color: #333;
+  margin: 0;
+  text-align: center; /* 中央揃え */
+  white-space: normal; /* 折り返しを許可 */
+  flex-grow: 1; /* 横幅いっぱいに広げる */
+  max-width: 100%; /* 横幅を100%に制限 */
+  word-wrap: break-word; /* 長い単語を折り返す */
 }
 
-button.edit-button:hover {
-  background-color: #000;
-}
-
-/* モーダルスタイル */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal img {
-  max-width: 80%;
-  max-height: 80%;
+.app-header p {
+  font-size: 1rem;
+  color: #333;
+  text-align: center;
+  margin: 0;
 }
 
 /* テーブル */
 table {
   width: 100%;
+  max-width: 100%; /* 画面幅に収める */
+  overflow-x: auto; /* 横スクロールを有効に */
   border-collapse: collapse;
+  table-layout: fixed; /* セル幅を均等に設定 */
+  margin: 0 auto; /* 左右中央配置 */
+  font-size: 0.75rem; /* テーブルのフォントサイズを小さく */
+  box-sizing: border-box; /* パディングを含めてボックスサイズを計算 */
 }
 
 th, td {
-  padding: 3px;  /* 高さを少し小さくして、行をコンパクトに */
+  padding: 4px; /* セルの余白を少なく */
   text-align: left;
-  border: 1px solid black;
+  border: 0.5px solid black;
+  word-wrap: break-word; /* 長い単語を折り返す */
+  overflow-wrap: break-word; /* 長い単語を折り返す */
+  white-space: nowrap; /* 改行を防ぐ */
+}
+
+/* 変更列の幅を狭く設定 */
+td:last-child, th:last-child {
+  width: 70px; /* 変更列の幅を調整 */
+  padding: 4px 6px; /* 変更列の余白調整 */
 }
 
 th {
   background-color: #f4f4f4;
 }
 
-/* 編集・削除ボタン専用 */
-button.edit-button, button.delete-button {
-  padding: 6px 12px;
-  margin: 5px;
+/* タイトルの色分け */
+td.income {
+  background-color: #ccffcc; /* 収入を薄い緑 */
+}
+
+td.expense {
+  background-color: #ffcccc; /* 自腹を薄い赤 */
+}
+
+/* 長いタイトルにスクロールを適用 */
+td.title {
+  max-width: 250px; /* 最大幅を設定 */
+  text-overflow: ellipsis; /* 長いテキストを省略記号(...)に変換 */
+  overflow: hidden; /* 内容が多すぎる場合に隠す */
+  white-space: nowrap; /* 一行で表示 */
+  position: relative;
+}
+
+td.title div {
+  max-width: 100%;
+  white-space: nowrap; /* 折り返しを禁止 */
+  overflow-x: auto; /* 横スクロール */
+  -webkit-overflow-scrolling: touch; /* スクロールをスムーズに */
+}
+
+/* アクションボタン */
+button.select-button {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.7rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  margin: 0.2rem;
+  transition: background-color 0.2s;
+}
+
+button.select-button:hover {
+  background-color: #357ab8;
+}
+
+/* モーダルのボタン */
+button.edit-button, button.delete-button, button.image-button {
+  padding: 0.4rem 0.8rem;
+  margin: 0.5rem;
+  font-size: 0.9rem;
 }
 
 button.edit-button {
-  background-color: black;
+  background-color: #333;
+  color: white;
 }
 
 button.delete-button {
   background-color: #f44336;
+  color: white;
 }
 
-button.edit-button:hover, button.delete-button:hover {
+button.image-button {
+  background-color: #4a90e2;
+  color: white;
+}
+
+button:hover {
   opacity: 0.8;
 }
 
-/* 収入・自腹で色分け */
-td[data-type="expense"] {
-  background-color: #ffcccc; /* 自腹を薄い赤 */
-}
-
-td[data-type="income"] {
-  background-color: #ccffcc; /* 収入を薄い緑 */
-}
-
-/* メディアクエリ（スマホ対応） */
+/* レスポンシブ対応 */
 @media (max-width: 600px) {
-  h1 {
-    font-size: 1.4rem;
+  table {
+    font-size: 0.7rem; /* スマホでは文字をさらに小さく */
   }
 
-  nav {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  nav a {
-    width: 100%;
-    text-align: center;
-    padding: 0.8rem; /* ボタンを広めにしてクリックしやすく */
-  }
-
-  /* テーブルの高さをさらに調整 */
   th, td {
-    padding: 6px;  /* スマホではさらにコンパクトに */
+    padding: 4px; /* セルの余白を減らす */
   }
+
+  /* アクションボタンを縦並びに */
+  td.actions button {
+    display: block;
+    margin-bottom: 5px;
+  }
+}
+
+/* h2のスタイル */
+h2 {
+  font-size: 1rem; /* サイズ調整 */
+  font-weight: 600; /* 太め */
+  color: #333; /* 文字色 */
+  margin: 0.5rem;
+  text-align: left; /* 左寄せ */
 }

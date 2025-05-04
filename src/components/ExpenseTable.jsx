@@ -1,14 +1,37 @@
 import { useState } from 'react';
+import Modal from 'react-modal';
 
+// Modalのアクションが選択されたらモーダルを閉じる
 const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDelete }) => {
-  // 初期表示行数を10に設定
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  
-  // ページネーションに基づいて表示する行を抽出
-  const displayedExpenses = filteredExpenses.slice(0, rowsPerPage);
+  const [showActions, setShowActions] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // モーダルの開閉状態
+  const [selectedItem, setSelectedItem] = useState(null); // 選択されたアイテム
 
   const handleRowsChange = (e) => {
     setRowsPerPage(Number(e.target.value)); // 行数を変更
+  };
+
+  const openModal = (item) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null); // モーダルを閉じたら選択をリセット
+  };
+
+  const handleAction = (action) => {
+    // 各アクションを実行
+    if (action === 'edit') {
+      handleEdit(selectedItem);
+    } else if (action === 'delete') {
+      handleDelete(selectedItem.id);
+    } else if (action === 'image') {
+      handleImageOpen(selectedItem.receipt);
+    }
+    closeModal(); // アクション後にモーダルを閉じる
   };
 
   return (
@@ -33,34 +56,80 @@ const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDel
         <thead>
           <tr>
             <th>日付</th>
-            <th>種類</th>
             <th>タイトル</th>
-            <th>金額</th>
             <th>入力者</th>
-            <th>アクション</th>
+            <th>金額[円]</th>
+            <th>変更</th>
           </tr>
         </thead>
         <tbody>
-          {displayedExpenses.map((item) => (
+          {filteredExpenses.slice(0, rowsPerPage).map((item) => (
             <tr key={item.id}>
               <td>{item.date}</td>
-              <td data-type={item.type === 'expense' ? 'expense' : 'income'}>
-                {item.type === 'income' ? '収入' : '自腹'}
+              <td className={`title ${item.type === 'income' ? 'income' : 'expense'}`}>
+                <div>{item.title}</div>
               </td>
-              <td>{item.title}</td>
-              <td>{item.amount}円</td>
               <td>{item.paidBy}</td>
+              <td>{item.amount}</td>
               <td>
-                {item.receipt && <button className="image-button" onClick={() => handleImageOpen(item.receipt)}>画像</button>}
-                <button className="edit-button" onClick={() => handleEdit(item)}>編集</button>
-                <button className="delete-button" onClick={() => handleDelete(item.id)}>削除</button>
+                <button 
+                  className="select-button" 
+                  onClick={() => openModal(item)}
+                >
+                  選択
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* モーダル */}
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="アクション選択"
+        ariaHideApp={false} // Reactの警告を避ける
+        style={{
+          overlay: { backgroundColor: 'rgba(0, 0, 0, 0.7)' },
+          content: {
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            padding: '20px',
+            maxWidth: '400px',
+            margin: 'auto',
+          },
+        }}
+      >
+        <h3>アクション選択</h3>
+        <div>
+          <button 
+            className="edit-button" 
+            onClick={() => handleAction('edit')}
+          >
+            編集
+          </button>
+          <button 
+            className="delete-button" 
+            onClick={() => handleAction('delete')}
+          >
+            削除
+          </button>
+          {selectedItem?.receipt && (
+            <button 
+              className="image-button" 
+              onClick={() => handleAction('image')}
+            >
+              画像
+            </button>
+          )}
+        </div>
+        <button onClick={closeModal} style={{ marginTop: '1rem' }}>
+          閉じる
+        </button>
+      </Modal>
     </div>
   );
-}
+};
 
 export default ExpenseTable;
