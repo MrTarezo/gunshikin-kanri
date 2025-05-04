@@ -7,7 +7,8 @@ import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import AddRecord from './pages/AddRecord';
 import Home from './pages/Home';
-
+import Modal from 'react-modal';
+Modal.setAppElement('#root');
 import './App.css'; // 👈 ここ重要！
 
 Amplify.configure(awsconfig);

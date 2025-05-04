@@ -13,15 +13,7 @@ export const getExpense = /* GraphQL */ `
       type
       createdAt
       updatedAt
-      receipt {
-        id
-        imageKey
-        uploadedAt
-        createdAt
-        updatedAt
-        __typename
-      }
-      expenseReceiptId
+      receipt
       __typename
     }
   }
@@ -43,7 +35,7 @@ export const listExpenses = /* GraphQL */ `
         type
         createdAt
         updatedAt
-        expenseReceiptId
+        receipt
         __typename
       }
       nextToken

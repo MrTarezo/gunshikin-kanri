@@ -13,15 +13,7 @@ export const onCreateExpense = /* GraphQL */ `
       type
       createdAt
       updatedAt
-      receipt {
-        id
-        imageKey
-        uploadedAt
-        createdAt
-        updatedAt
-        __typename
-      }
-      expenseReceiptId
+      receipt
       __typename
     }
   }
@@ -38,15 +30,7 @@ export const onUpdateExpense = /* GraphQL */ `
       type
       createdAt
       updatedAt
-      receipt {
-        id
-        imageKey
-        uploadedAt
-        createdAt
-        updatedAt
-        __typename
-      }
-      expenseReceiptId
+      receipt
       __typename
     }
   }
@@ -63,15 +47,7 @@ export const onDeleteExpense = /* GraphQL */ `
       type
       createdAt
       updatedAt
-      receipt {
-        id
-        imageKey
-        uploadedAt
-        createdAt
-        updatedAt
-        __typename
-      }
-      expenseReceiptId
+      receipt
       __typename
     }
   }

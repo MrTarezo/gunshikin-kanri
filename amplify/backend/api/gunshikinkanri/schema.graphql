@@ -8,7 +8,7 @@ type Expense @model @auth(rules: [{ allow: private }]) {
   type: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
-  receipt: Receipt @hasOne
+  receipt: String
 }
 
 type Receipt @model @auth(rules: [{ allow: private }]) {

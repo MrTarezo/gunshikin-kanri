@@ -17,6 +17,9 @@
       },
       "api": {
         "gunshikinkanri": {}
+      },
+      "storage": {
+        "imageUpload": {}
       }
     }
   }
