@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { listExpenses } from '../graphql/queries';
-import { updateExpense, deleteExpense } from '../graphql/mutations';
+import { createExpense, updateExpense, deleteExpense } from '../graphql/mutations';
 import { getUrl } from 'aws-amplify/storage';
 import Filters from '../components/Filters';
 import ExpenseTable from '../components/ExpenseTable';
 import MonthlyChart from '../components/MonthlyChart';
 import EditModal from '../components/EditModal';
+import AddModal from '../components/AddModal';
 import Modal from 'react-modal';
 
 const client = generateClient();
 
-export default function Home() {
+export default function Home({ nickname }) {
   const [expenses, setExpenses] = useState([]);
   const [filter, setFilter] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
@@ -20,18 +21,20 @@ export default function Home() {
   const [editItem, setEditItem] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isAddModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchExpenses = async () => {
-      try {
-        const result = await client.graphql({ query: listExpenses });
-        setExpenses(result.data.listExpenses.items);
-      } catch (err) {
-        console.error('取得エラー:', err);
-      }
-    };
     fetchExpenses();
   }, []);
+
+  const fetchExpenses = async () => {
+    try {
+      const result = await client.graphql({ query: listExpenses });
+      setExpenses(result.data.listExpenses.items);
+    } catch (err) {
+      console.error('取得エラー:', err);
+    }
+  };
 
   const sortedExpenses = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
   const months = Array.from(new Set(expenses.map(e => e.date.slice(0, 7)))).sort();
@@ -68,7 +71,9 @@ export default function Home() {
 
   const handleImageOpen = async (key) => {
     try {
-      const { url } = await getUrl({ key });
+      console.log("🔑 stored key:", key);
+      const { url } = await getUrl({ path: key }); // ← decode しない
+      console.log('📷 image URL:', url.href);
       setImageUrl(url.href);
       setIsImageModalOpen(true);
     } catch (err) {
@@ -76,14 +81,15 @@ export default function Home() {
       alert('画像の取得に失敗しました');
     }
   };
-
+  
+  
   const handleEditSubmit = async (e) => {
-    e.preventDefault(); // フォームのリロードを防ぐ
+    e.preventDefault();
     try {
       const input = {
         id: editItem.id,
         title: editItem.title,
-        amount: parseFloat(editItem.amount), // 金額を数値に変換
+        amount: parseFloat(editItem.amount),
         type: editItem.type,
         date: editItem.date,
       };
@@ -105,9 +111,16 @@ export default function Home() {
     }
   };
 
+  const handleAdd = (newItem) => {
+    setExpenses(prev => [newItem, ...prev]);
+    setAddModalOpen(false);
+  };
+
   return (
     <div>
       <h2> 🔹登録済みの支出一覧表</h2>
+      <button onClick={() => setAddModalOpen(true)}>＋ 新規記録を追加</button>
+
       <Filters
         filter={filter}
         setFilter={setFilter}
@@ -141,6 +154,13 @@ export default function Home() {
           onSubmit={handleEditSubmit}
         />
       )}
+
+      <AddModal
+        isOpen={isAddModalOpen}
+        onRequestClose={() => setAddModalOpen(false)}
+        nickname={nickname}
+        onAdded={handleAdd}
+      />
 
       <Modal
         isOpen={isImageModalOpen}

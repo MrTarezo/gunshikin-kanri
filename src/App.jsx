@@ -5,7 +5,6 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import AddRecord from './pages/AddRecord';
 import Home from './pages/Home';
 import Modal from 'react-modal';
 Modal.setAppElement('#root');
@@ -44,14 +43,12 @@ function App() {
             </header>
 
             <nav className="app-nav">
-            <Link to="/add">➕ 新規登録 ➕</Link>
               <Link to="/">📋 記録一覧 📋</Link>
             </nav>
 
             <main className="app-main">
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/add" element={<AddRecord nickname={nickname} />} />
+                <Route path="/" element={<Home nickname={nickname} />} />
               </Routes>
             </main>
           </div>

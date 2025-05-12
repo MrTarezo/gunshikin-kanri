@@ -1,17 +1,24 @@
+// src/components/AddModal.jsx
 import { useState } from 'react';
+import Modal from 'react-modal';
 import { generateClient } from 'aws-amplify/api';
 import { createExpense } from '../graphql/mutations';
-import { useNavigate } from 'react-router-dom';
 import { uploadData } from 'aws-amplify/storage';
 
 const client = generateClient();
 
-function AddRecord({ nickname }) {
-  const navigate = useNavigate();
+function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('expense');
   const [file, setFile] = useState(null);
+
+  const resetForm = () => {
+    setTitle('');
+    setAmount('');
+    setType('expense');
+    setFile(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,16 +27,13 @@ function AddRecord({ nickname }) {
       let imageKey = null;
 
       if (file) {
-        // ファイル名をURLエンコード（スペース・日本語対策）
         const encodedFileName = encodeURIComponent(file.name);
-        const path = 'receipts/${encodedFileName}';
+        const path = `receipts/${encodedFileName}`;
 
         const result = await uploadData({
           path,
           data: file,
-          options: {
-            contentType: file.type,
-          },
+          options: { contentType: file.type },
         });
 
         imageKey = result?.path || path;
@@ -43,7 +47,7 @@ function AddRecord({ nickname }) {
         comment: '',
         type,
         date: new Date().toISOString().split('T')[0],
-        receipt: imageKey || '', // 画像キーがあれば保存、なければ空文字
+        receipt: imageKey || '',
       };
 
       const result = await client.graphql({
@@ -53,7 +57,10 @@ function AddRecord({ nickname }) {
 
       console.log('登録成功:', result.data.createExpense);
       alert('登録できました！');
-      navigate('/');
+
+      onAdded(result.data.createExpense); // 一覧更新
+      resetForm();
+      onRequestClose(); // モーダルを閉じる
     } catch (error) {
       console.error('登録失敗:', error);
       alert('エラーが発生しました');
@@ -61,7 +68,27 @@ function AddRecord({ nickname }) {
   };
 
   return (
-    <div>
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      contentLabel="記録追加"
+      style={{
+        content: {
+          top: '50%',
+          left: '50%',
+          right: 'auto',
+          bottom: 'auto',
+          transform: 'translate(-50%, -50%)',
+          maxWidth: '90vw',
+          padding: '2rem',
+        },
+        overlay: {
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          zIndex: 1000,
+        },
+      }}
+      ariaHideApp={false}
+    >
       <h2>自腹・収入の登録</h2>
       <form onSubmit={handleSubmit}>
         <input
@@ -87,10 +114,22 @@ function AddRecord({ nickname }) {
           accept="image/*"
           onChange={(e) => setFile(e.target.files[0])}
         />
-        <button type="submit">登録</button>
+        <div style={{ marginTop: '1rem' }}>
+          <button type="submit">登録</button>
+          <button
+            type="button"
+            onClick={() => {
+              resetForm();
+              onRequestClose();
+            }}
+            style={{ marginLeft: '1rem' }}
+          >
+            閉じる
+          </button>
+        </div>
       </form>
-    </div>
+    </Modal>
   );
 }
 
-export default AddRecord;
+export default AddModal;
