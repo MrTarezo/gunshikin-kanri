@@ -7,6 +7,7 @@ import Filters from '../components/Filters';
 import AddModal from '../components/AddModal';
 import EditModal from '../components/EditModal';
 import MonthlyChart from '../components/MonthlyChart';
+import CategoryPieChart from '../components/CategoryPieChart'; // ← ファイルが必要
 import Modal from 'react-modal';
 
 const client = generateClient();
@@ -23,6 +24,7 @@ export default function Home({ nickname }) {
   const [isSettlementMode, setIsSettlementMode] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [showPieChart, setShowPieChart] = useState(false);
 
   useEffect(() => {
     fetchExpenses();
@@ -113,15 +115,20 @@ export default function Home({ nickname }) {
 
   return (
     <div>
-      <button onClick={() => setAddModalOpen(true)}>＋ 新規記録を追加</button>
-      <label style={{ marginLeft: '1rem' }}>
-        <input
-          type="checkbox"
-          checked={isSettlementMode}
-          onChange={(e) => setIsSettlementMode(e.target.checked)}
-        />
-        精算モード
-      </label>
+    <button onClick={() => setAddModalOpen(true)}>＋ 新規記録を追加</button>
+
+<button onClick={() => setShowPieChart(prev => !prev)} style={{ marginLeft: '0.5rem' }}>
+  {showPieChart ? '📊 一覧に戻る' : '📈 円グラフ表示'}
+</button>
+
+<label style={{ marginLeft: '1rem' }}>
+  <input
+    type="checkbox"
+    checked={isSettlementMode}
+    onChange={(e) => setIsSettlementMode(e.target.checked)}
+  />
+  精算モード
+</label>
 
       {isSettlementMode && filteredExpenses.length > 0 && (
         <button
@@ -143,53 +150,51 @@ export default function Home({ nickname }) {
         nicknames={nicknames}
       />
 
-      <ExpenseTable
-        filteredExpenses={filteredExpenses}
-        handleImageOpen={(key) => {
-          import('aws-amplify/storage')
-            .then(({ getUrl }) =>
-              getUrl({ path: key, options: { accessLevel: 'protected' } })
-            )
-            .then(({ url }) => {
-              setImageUrl(url.href);
-              setIsImageModalOpen(true);
-            })
-            .catch(() => alert('画像取得失敗'));
-        }}
-        handleEdit={(item) => {
-          setEditItem(item);
-          setIsEditModalOpen(true);
-        }}
-        handleDelete={async (id) => {
-          if (window.confirm('削除しますか？')) {
-            await client.graphql({
-              query: require('../graphql/mutations').deleteExpense,
-              variables: { input: { id } },
-            });
-            setExpenses(prev => prev.filter(e => e.id !== id));
-          }
-        }}
-      />
+{showPieChart ? (
+  <CategoryPieChart expenses={filteredExpenses} />
+) : (
+  <>
+    <ExpenseTable
+      filteredExpenses={filteredExpenses}
+      handleImageOpen={(key) => {
+        import('aws-amplify/storage')
+          .then(({ getUrl }) =>
+            getUrl({ path: key, options: { accessLevel: 'protected' } })
+          )
+          .then(({ url }) => {
+            setImageUrl(url.href);
+            setIsImageModalOpen(true);
+          })
+          .catch(() => alert('画像取得失敗'));
+      }}
+      handleEdit={(item) => {
+        setEditItem(item);
+        setIsEditModalOpen(true);
+      }}
+      handleDelete={async (id) => {
+        if (window.confirm('削除しますか？')) {
+          await client.graphql({
+            query: require('../graphql/mutations').deleteExpense,
+            variables: { input: { id } },
+          });
+          setExpenses(prev => prev.filter(e => e.id !== id));
+        }
+      }}
+    />
 
-      <MonthlyChart expenses={filteredExpenses} />
+    <MonthlyChart expenses={filteredExpenses} />
 
-      <div className="summary-box">
-        <p> <strong>収入合計</strong>：<span style={{ color: 'green' }}>+{incomeTotal.toLocaleString()}円</span></p>
-        <p> <strong>支出合計</strong>：<span style={{ color: 'red' }}>-{expenseTotal.toLocaleString()}円</span></p>
-        <p> <strong>差引合計</strong>：<span style={{ color: netTotal >= 0 ? 'green' : 'red' }}>
-          {netTotal >= 0 ? '+' : ''}
-          {netTotal.toLocaleString()}円
-        </span></p>
-      </div>
+    <div className="summary-box">
+      <p><strong>収入合計</strong>：<span style={{ color: 'green' }}>+{incomeTotal.toLocaleString()}円</span></p>
+      <p><strong>支出合計</strong>：<span style={{ color: 'red' }}>-{expenseTotal.toLocaleString()}円</span></p>
+      <p><strong>差引合計</strong>：<span style={{ color: netTotal >= 0 ? 'green' : 'red' }}>
+        {netTotal >= 0 ? '+' : ''}
+        {netTotal.toLocaleString()}円
+      </span></p>
+    </div>
+  </>
+)}
 
-      {isEditModalOpen && editItem && (
-        <EditModal
-          editItem={editItem}
-          onClose={() => setIsEditModalOpen(false)}
-          onChange={setEditItem}
-          onSubmit={handleEditSubmit}
-        />
-      )}
 
       <AddModal
         isOpen={isAddModalOpen}
