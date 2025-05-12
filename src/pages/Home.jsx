@@ -14,17 +14,15 @@ const client = generateClient();
 export default function Home({ nickname }) {
   const [expenses, setExpenses] = useState([]);
   const [filter, setFilter] = useState('all');
-  const nowMonth = new Date().toISOString().slice(0, 7); // '2025-05'
-  const [selectedMonth, setSelectedMonth] = useState(nowMonth); // ←ここを修正！
+  const nowMonth = new Date().toISOString().slice(0, 7);
+  const [selectedMonth, setSelectedMonth] = useState(nowMonth);
   const [selectedNickname, setSelectedNickname] = useState('all');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [isAddModalOpen, setAddModalOpen] = useState(false);
-  const [isSettlementMode, setIsSettlementMode] = useState(false); // 🔹精算モード
+  const [isSettlementMode, setIsSettlementMode] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-
-  
 
   useEffect(() => {
     fetchExpenses();
@@ -48,12 +46,21 @@ export default function Home({ nickname }) {
     (filter === 'all' || item.type === filter) &&
     (selectedMonth === 'all' || item.date.startsWith(selectedMonth)) &&
     (selectedNickname === 'all' || item.paidBy === selectedNickname) &&
-    (!isSettlementMode || !item.settled) // 🔹未精算のみ
+    (!isSettlementMode || !item.settled)
   );
+
+  const incomeTotal = filteredExpenses
+    .filter(item => item.type === 'income')
+    .reduce((sum, item) => sum + item.amount, 0);
+
+  const expenseTotal = filteredExpenses
+    .filter(item => item.type === 'expense')
+    .reduce((sum, item) => sum + item.amount, 0);
+
+  const netTotal = incomeTotal - expenseTotal;
 
   const handleSettle = async () => {
     if (!window.confirm('本当に精算しますか？')) return;
-
     try {
       const updated = await Promise.all(filteredExpenses.map(async (item) => {
         const res = await client.graphql({
@@ -76,10 +83,6 @@ export default function Home({ nickname }) {
     }
   };
 
-  const totalAmount = filteredExpenses.reduce((sum, item) =>
-    item.type === 'income' ? sum + item.amount : sum - item.amount, 0
-  );
-
   const handleAdd = (item) => {
     setExpenses(prev => [item, ...prev]);
     setAddModalOpen(false);
@@ -94,7 +97,7 @@ export default function Home({ nickname }) {
         amount: parseFloat(editItem.amount),
         type: editItem.type,
         date: editItem.date,
-        category: editItem.category, 
+        category: editItem.category,
       };
       const res = await client.graphql({ query: updateExpense, variables: { input } });
       setExpenses(prev =>
@@ -111,8 +114,6 @@ export default function Home({ nickname }) {
   return (
     <div>
       <button onClick={() => setAddModalOpen(true)}>＋ 新規記録を追加</button>
-
-      {/* 🔹精算モードトグル */}
       <label style={{ marginLeft: '1rem' }}>
         <input
           type="checkbox"
@@ -122,9 +123,11 @@ export default function Home({ nickname }) {
         精算モード
       </label>
 
-      {/* 🔹精算ボタン */}
       {isSettlementMode && filteredExpenses.length > 0 && (
-        <button onClick={handleSettle} style={{ marginLeft: '1rem', backgroundColor: '#4caf50', color: 'white', padding: '0.5rem' }}>
+        <button
+          onClick={handleSettle}
+          style={{ marginLeft: '1rem', backgroundColor: '#4caf50', color: 'white', padding: '0.5rem' }}
+        >
           精算する
         </button>
       )}
@@ -153,14 +156,13 @@ export default function Home({ nickname }) {
             })
             .catch(() => alert('画像取得失敗'));
         }}
-      
         handleEdit={(item) => {
           setEditItem(item);
-          setIsEditModalOpen(true); // ← これを追加！
+          setIsEditModalOpen(true);
         }}
         handleDelete={async (id) => {
           if (window.confirm('削除しますか？')) {
-            const res = await client.graphql({
+            await client.graphql({
               query: require('../graphql/mutations').deleteExpense,
               variables: { input: { id } },
             });
@@ -169,15 +171,16 @@ export default function Home({ nickname }) {
         }}
       />
 
-      <p>
-        合計収支：
-        <span style={{ color: totalAmount >= 0 ? 'green' : 'red' }}>
-          {totalAmount >= 0 ? '+' : ''}
-          {totalAmount.toLocaleString()}円
-        </span>
-      </p>
-
       <MonthlyChart expenses={filteredExpenses} />
+
+      <div className="summary-box">
+        <p> <strong>収入合計</strong>：<span style={{ color: 'green' }}>+{incomeTotal.toLocaleString()}円</span></p>
+        <p> <strong>支出合計</strong>：<span style={{ color: 'red' }}>-{expenseTotal.toLocaleString()}円</span></p>
+        <p> <strong>差引合計</strong>：<span style={{ color: netTotal >= 0 ? 'green' : 'red' }}>
+          {netTotal >= 0 ? '+' : ''}
+          {netTotal.toLocaleString()}円
+        </span></p>
+      </div>
 
       {isEditModalOpen && editItem && (
         <EditModal

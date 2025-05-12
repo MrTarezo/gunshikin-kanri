@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Modal from 'react-modal';
 import { generateClient } from 'aws-amplify/api';
@@ -23,7 +24,6 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       let imageKey = '';
 
@@ -31,7 +31,6 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         const today = new Date().toISOString().split('T')[0];
         const encodedFileName = encodeURIComponent(file.name);
         const s3Key = `receipts/${today}_${encodedFileName}`;
-
         const result = await uploadData({
           path: s3Key,
           data: file,
@@ -40,7 +39,6 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
             contentType: file.type,
           },
         });
-
         imageKey = result?.path || s3Key;
         console.log('✅ 画像アップロード成功:', imageKey);
       }
@@ -65,7 +63,6 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
 
       console.log('✅ 登録成功:', result.data.createExpense);
       alert('登録できました！');
-
       onAdded(result.data.createExpense);
       resetForm();
       onRequestClose();
@@ -76,75 +73,116 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onRequestClose={onRequestClose}
-      contentLabel="記録追加"
-      style={{
-        content: {
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          maxWidth: '90vw',
-          padding: '2rem',
-        },
-        overlay: {
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          zIndex: 1000,
-        },
-      }}
-      ariaHideApp={false}
-    >
-      <h2>自腹・収入の登録</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="内容"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-        <input
-          type="number"
-          placeholder="金額[円]"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          required
-        />
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="expense">自腹</option>
-          <option value="income">収入</option>
-        </select>
-        <select value={category} onChange={(e) => setCategory(e.target.value)} required>
-          <option value="">カテゴリを選択</option>
-          <option value="食費">食費</option>
-          <option value="日用品">日用品</option>
-          <option value="交通費">交通費</option>
-          <option value="娯楽">娯楽</option>
-          <option value="外食">外食</option>
-          <option value="収入">収入</option>
-          <option value="その他">その他</option>
-        </select>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files[0])}
-        />
-        <div style={{ marginTop: '1rem' }}>
-          <button type="submit">登録</button>
-          <button
-            type="button"
-            onClick={() => {
-              resetForm();
-              onRequestClose();
-            }}
-            style={{ marginLeft: '1rem' }}
-          >
-            閉じる
-          </button>
-        </div>
-      </form>
-    </Modal>
+    <>
+      <style>
+        {`
+          .add-form input,
+          .add-form select {
+            display: block;
+            width: 100%;
+            padding: 0.6rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            min-height: 44px;
+          }
+
+          .add-form button {
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            background-color: #4caf50;
+            color: white;
+            cursor: pointer;
+          }
+
+          .add-form button:hover {
+            background-color: #3e8e41;
+          }
+
+          .add-form .button-row {
+            display: flex;
+            justify-content: flex-start;
+            gap: 1rem;
+            margin-top: 1.5rem;
+          }
+        `}
+      </style>
+
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={onRequestClose}
+        contentLabel="記録追加"
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            maxWidth: '500px',
+            width: '90vw',
+            padding: '2rem',
+            borderRadius: '12px',
+          },
+          overlay: {
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 1000,
+          },
+        }}
+        ariaHideApp={false}
+      >
+        <h2>自腹・収入の登録</h2>
+        <form onSubmit={handleSubmit} className="add-form">
+          <input
+            type="text"
+            placeholder="内容"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+          <input
+            type="number"
+            placeholder="金額 [円]"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            required
+          />
+          <select value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="expense">自腹</option>
+            <option value="income">収入</option>
+          </select>
+          <select value={category} onChange={(e) => setCategory(e.target.value)} required>
+            <option value="">カテゴリを選択</option>
+            <option value="食費">食費</option>
+            <option value="日用品">日用品</option>
+            <option value="交通費">交通費</option>
+            <option value="娯楽">娯楽</option>
+            <option value="外食">外食</option>
+            <option value="収入">収入</option>
+            <option value="その他">その他</option>
+          </select>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
+          <div className="button-row">
+            <button type="submit">登録</button>
+            <button
+              type="button"
+              onClick={() => {
+                resetForm();
+                onRequestClose();
+              }}
+            >
+              閉じる
+            </button>
+          </div>
+        </form>
+      </Modal>
+    </>
   );
 }
 
