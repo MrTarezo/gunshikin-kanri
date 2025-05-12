@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import Modal from 'react-modal';
 
-// Modalのアクションが選択されたらモーダルを閉じる
 const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDelete }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [showActions, setShowActions] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); // モーダルの開閉状態
-  const [selectedItem, setSelectedItem] = useState(null); // 選択されたアイテム
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const handleRowsChange = (e) => {
-    setRowsPerPage(Number(e.target.value)); // 行数を変更
+    setRowsPerPage(Number(e.target.value));
   };
 
   const openModal = (item) => {
@@ -19,11 +17,10 @@ const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDel
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedItem(null); // モーダルを閉じたら選択をリセット
+    setSelectedItem(null);
   };
 
   const handleAction = (action) => {
-    // 各アクションを実行
     if (action === 'edit') {
       handleEdit(selectedItem);
     } else if (action === 'delete') {
@@ -31,17 +28,16 @@ const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDel
     } else if (action === 'image') {
       handleImageOpen(selectedItem.receipt);
     }
-    closeModal(); // アクション後にモーダルを閉じる
+    closeModal();
   };
 
   return (
-    <div>
-      {/* 行数変更のセレクタ */}
+    <div className="expense-table-wrapper">
       <div style={{ marginBottom: '1rem' }}>
         <label htmlFor="rows-per-page">表示件数: </label>
-        <select 
-          id="rows-per-page" 
-          value={rowsPerPage} 
+        <select
+          id="rows-per-page"
+          value={rowsPerPage}
           onChange={handleRowsChange}
         >
           <option value={10}>10件</option>
@@ -51,7 +47,6 @@ const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDel
         </select>
       </div>
 
-      {/* テーブル */}
       <table className="expense-table">
         <thead>
           <tr>
@@ -67,13 +62,18 @@ const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDel
             <tr key={item.id}>
               <td>{item.date}</td>
               <td className={`title ${item.type === 'income' ? 'income' : 'expense'}`}>
-                <div>{item.title}</div>
+                <div
+                  className="scrollable-cell"
+                  title={item.title}
+                >
+                  {item.title}
+                </div>
               </td>
               <td>{item.paidBy}</td>
               <td>{item.amount.toLocaleString()}円</td>
               <td>
-                <button 
-                  className="select-button" 
+                <button
+                  className="select-button"
                   onClick={() => openModal(item)}
                 >
                   選択
@@ -84,12 +84,11 @@ const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDel
         </tbody>
       </table>
 
-      {/* モーダル */}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={closeModal}
         contentLabel="アクション選択"
-        ariaHideApp={false} // Reactの警告を避ける
+        ariaHideApp={false}
         style={{
           overlay: { backgroundColor: 'rgba(0, 0, 0, 0.7)' },
           content: {
@@ -103,30 +102,13 @@ const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDel
       >
         <h3>アクション選択</h3>
         <div>
-          <button 
-            className="edit-button" 
-            onClick={() => handleAction('edit')}
-          >
-            編集
-          </button>
-          <button 
-            className="delete-button" 
-            onClick={() => handleAction('delete')}
-          >
-            削除
-          </button>
+          <button className="edit-button" onClick={() => handleAction('edit')}>編集</button>
+          <button className="delete-button" onClick={() => handleAction('delete')}>削除</button>
           {selectedItem?.receipt && (
-            <button 
-              className="image-button" 
-              onClick={() => handleAction('image')}
-            >
-              画像
-            </button>
+            <button className="image-button" onClick={() => handleAction('image')}>画像</button>
           )}
         </div>
-        <button onClick={closeModal} style={{ marginTop: '1rem' }}>
-          閉じる
-        </button>
+        <button onClick={closeModal} style={{ marginTop: '1rem' }}>閉じる</button>
       </Modal>
     </div>
   );

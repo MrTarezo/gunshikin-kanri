@@ -4,34 +4,32 @@ body {
   font-family: 'Segoe UI', Roboto, sans-serif;
   background: linear-gradient(135deg, white, #ffffff);
   color: #333;
-  font-size: 0.8rem; /* 全体的なフォントサイズを小さく */
+  font-size: 0.8rem;
 }
 
 /* ヘッダー */
 .app-header {
   display: flex;
-  justify-content: space-between; /* 左右に広げる */
-  align-items: center; /* 中央に配置 */
+  justify-content: space-between;
+  align-items: center;
   margin: auto;
   font-size: 1.2rem;
-  flex-wrap: wrap; /* 複数行に折り返す */
-  width: 100%; /* ヘッダー全体に幅を設定 */
-  padding: 0 10px; /* 横の余白調整 */
-  box-sizing: border-box; /* パディングを含めてボックスサイズを計算 */
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
-/* サインアウトボタン */
 .app-header button {
   background-color: #ff6f61;
   color: white;
   border: none;
   padding: 0.4rem 1.5rem;
   font-size: 1rem;
-  margin: 0;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
-  order: 2; /* ボタンを右端に配置 */
+  order: 2;
 }
 
 .app-header button:hover {
@@ -39,14 +37,14 @@ body {
 }
 
 .app-header h1 {
-  font-size: 1.5rem; /* タイトルのフォントサイズ */
+  font-size: 1.5rem;
   color: #333;
   margin: 0;
-  text-align: center; /* 中央揃え */
-  white-space: normal; /* 折り返しを許可 */
-  flex-grow: 1; /* 横幅いっぱいに広げる */
-  max-width: 100%; /* 横幅を100%に制限 */
-  word-wrap: break-word; /* 長い単語を折り返す */
+  text-align: center;
+  white-space: normal;
+  flex-grow: 1;
+  max-width: 100%;
+  word-wrap: break-word;
 }
 
 .app-header p {
@@ -56,60 +54,71 @@ body {
   margin: 0;
 }
 
-/* テーブル */
+/* テーブルラッパー：横スクロール対応 */
+.expense-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.expense-table-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* テーブル本体 */
 table {
   width: 100%;
-  max-width: 100%; /* 画面幅に収める */
-  overflow-x: auto; /* 横スクロールを有効に */
+  max-width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; /* セル幅を均等に設定 */
-  margin: 0 auto; /* 左右中央配置 */
-  font-size: 0.75rem; /* テーブルのフォントサイズを小さく */
-  box-sizing: border-box; /* パディングを含めてボックスサイズを計算 */
+  table-layout: fixed;
+  margin: 0 auto;
+  font-size: 0.75rem;
+  box-sizing: border-box;
 }
 
 th, td {
-  padding: 4px; /* セルの余白を少なく */
+  padding: 4px;
   text-align: left;
-  border: 0.5px solid black;
-  word-wrap: break-word; /* 長い単語を折り返す */
-  overflow-wrap: break-word; /* 長い単語を折り返す */
-  white-space: nowrap; /* 改行を防ぐ */
+  border: 0.5px solid #ccc;
+  white-space: nowrap;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
-/* 変更列の幅を狭く設定 */
+/* 金額列だけ右寄せ */
+td:nth-child(4), th:nth-child(4) {
+  text-align: right;
+}
+
+/* 変更列の幅を狭く */
 td:last-child, th:last-child {
-  width: 70px; /* 変更列の幅を調整 */
-  padding: 4px 6px; /* 変更列の余白調整 */
+  width: 70px;
+  padding: 4px 6px;
 }
 
 th {
   background-color: #f4f4f4;
 }
 
-/* タイトルの色分け */
+/* 収入・支出セルの背景だけ色分け（文字は黒） */
 td.income {
-  background-color: #ccffcc; /* 収入を薄い緑 */
+  background-color: #e0ffe0;
+  color: #000;
 }
 
 td.expense {
-  background-color: #ffcccc; /* 自腹を薄い赤 */
+  background-color: #ffe0e0;
+  color: #000;
 }
 
-/* 長いタイトルにスクロールを適用 */
+/* タイトル列：省略＋ツールチップ対応 */
 td.title {
-  max-width: 250px; /* 最大幅を設定 */
-  text-overflow: ellipsis; /* 長いテキストを省略記号(...)に変換 */
-  overflow: hidden; /* 内容が多すぎる場合に隠す */
-  white-space: nowrap; /* 一行で表示 */
-  position: relative;
+  max-width: 250px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-td.title div {
-  max-width: 100%;
-  white-space: nowrap; /* 折り返しを禁止 */
-  overflow-x: auto; /* 横スクロール */
-  -webkit-overflow-scrolling: touch; /* スクロールをスムーズに */
+td[title] {
+  cursor: help;
 }
 
 /* アクションボタン */
@@ -129,54 +138,60 @@ button.select-button:hover {
   background-color: #357ab8;
 }
 
-/* モーダルのボタン */
+/* モーダルボタン */
 button.edit-button, button.delete-button, button.image-button {
   padding: 0.4rem 0.8rem;
   margin: 0.5rem;
   font-size: 0.9rem;
+  color: white;
+  border: none;
+  border-radius: 6px;
 }
 
 button.edit-button {
   background-color: #333;
-  color: white;
 }
 
 button.delete-button {
   background-color: #f44336;
-  color: white;
 }
 
 button.image-button {
   background-color: #4a90e2;
-  color: white;
 }
 
 button:hover {
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
-/* レスポンシブ対応 */
+/* レスポンシブ調整 */
 @media (max-width: 600px) {
   table {
-    font-size: 0.7rem; /* スマホでは文字をさらに小さく */
+    font-size: 0.7rem;
   }
 
   th, td {
-    padding: 4px; /* セルの余白を減らす */
+    padding: 4px;
   }
 
-  /* アクションボタンを縦並びに */
   td.actions button {
     display: block;
     margin-bottom: 5px;
   }
 }
 
-/* h2のスタイル */
+/* h2見出し */
 h2 {
-  font-size: 1rem; /* サイズ調整 */
-  font-weight: 600; /* 太め */
-  color: #333; /* 文字色 */
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
   margin: 0.5rem;
-  text-align: left; /* 左寄せ */
+  text-align: left;
+}
+
+.scrollable-cell {
+  max-width: 250px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
 }

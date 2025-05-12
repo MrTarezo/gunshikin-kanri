@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Modal from 'react-modal';
 import { generateClient } from 'aws-amplify/api';
 import { createExpense } from '../graphql/mutations';
-import { uploadData } from '@aws-amplify/storage'; // ←ここ！
+import { uploadData } from '@aws-amplify/storage';
 
 const client = generateClient();
 
@@ -10,12 +10,14 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('expense');
+  const [category, setCategory] = useState('');
   const [file, setFile] = useState(null);
 
   const resetForm = () => {
     setTitle('');
     setAmount('');
     setType('expense');
+    setCategory('');
     setFile(null);
   };
 
@@ -29,8 +31,9 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         const today = new Date().toISOString().split('T')[0];
         const encodedFileName = encodeURIComponent(file.name);
         const s3Key = `receipts/${today}_${encodedFileName}`;
+
         const result = await uploadData({
-          path: `receipts/${today}_${encodedFileName}`, // ✅ プレフィックス不要（Amplifyが付ける）
+          path: s3Key,
           data: file,
           options: {
             accessLevel: 'protected',
@@ -50,6 +53,9 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         type,
         date: new Date().toISOString().split('T')[0],
         receipt: imageKey,
+        category: category,
+        settled: false, 
+        settlementMonth: null
       };
 
       const result = await client.graphql({
@@ -76,11 +82,11 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
       contentLabel="記録追加"
       style={{
         content: {
-          top: '40%',
-          left: '40%',
-          transform: 'translate(-20%, -20%)',
-          maxWidth: '1000vw',
-          padding: '1rem',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          maxWidth: '90vw',
+          padding: '2rem',
         },
         overlay: {
           backgroundColor: 'rgba(0,0,0,0.5)',
@@ -108,6 +114,15 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         <select value={type} onChange={(e) => setType(e.target.value)}>
           <option value="expense">自腹</option>
           <option value="income">収入</option>
+        </select>
+        <select value={category} onChange={(e) => setCategory(e.target.value)} required>
+          <option value="">カテゴリを選択</option>
+          <option value="食費">食費</option>
+          <option value="交通費">交通費</option>
+          <option value="日用品">日用品</option>
+          <option value="外食">外食</option>
+          <option value="娯楽">娯楽</option>
+          <option value="その他">その他</option>
         </select>
         <input
           type="file"

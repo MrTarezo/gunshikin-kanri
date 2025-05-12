@@ -14,6 +14,9 @@ export const getExpense = /* GraphQL */ `
       createdAt
       updatedAt
       receipt
+      settled
+      settlementMonth
+      category
       __typename
     }
   }
@@ -36,6 +39,9 @@ export const listExpenses = /* GraphQL */ `
         createdAt
         updatedAt
         receipt
+        settled
+        settlementMonth
+        category
         __typename
       }
       nextToken

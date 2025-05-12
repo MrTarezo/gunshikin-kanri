@@ -14,6 +14,9 @@ export const onCreateExpense = /* GraphQL */ `
       createdAt
       updatedAt
       receipt
+      settled
+      settlementMonth
+      category
       __typename
     }
   }
@@ -31,6 +34,9 @@ export const onUpdateExpense = /* GraphQL */ `
       createdAt
       updatedAt
       receipt
+      settled
+      settlementMonth
+      category
       __typename
     }
   }
@@ -48,6 +54,9 @@ export const onDeleteExpense = /* GraphQL */ `
       createdAt
       updatedAt
       receipt
+      settled
+      settlementMonth
+      category
       __typename
     }
   }

@@ -9,6 +9,9 @@ type Expense @model @auth(rules: [{ allow: private }]) {
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
   receipt: String
+  settled: Boolean!
+  settlementMonth: String             
+  category: String
 }
 
 type Receipt @model @auth(rules: [{ allow: private }]) {
