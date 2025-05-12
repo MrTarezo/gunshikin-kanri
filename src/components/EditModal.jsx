@@ -4,7 +4,7 @@ export default function EditModal({ editItem, onClose, onChange, onSubmit }) {
   const handleChange = (field, value) => {
     onChange({ ...editItem, [field]: value });
   };
-
+  
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -39,6 +39,25 @@ export default function EditModal({ editItem, onClose, onChange, onSubmit }) {
             <option value="expense">自腹</option>
             <option value="income">収入</option>
           </select>
+          <select
+            value={editItem.category}
+            onChange={(e) => {
+              console.log('editItem.category:', editItem.category);
+              handleChange('category', e.target.value);
+            }}
+            required
+            style={{ marginTop: '0.5rem' }}
+          >
+            <option value="">カテゴリを選択</option>
+            <option value="食費">食費</option>
+            <option value="日用品">日用品</option>
+            <option value="交通費">交通費</option>
+            <option value="娯楽">娯楽</option>
+            <option value="外食">外食</option>
+            <option value="収入">収入</option>
+            <option value="その他">その他</option>
+          </select>
+
           <div style={{ marginTop: '1rem' }}>
             <button type="submit">保存</button>
             <button type="button" onClick={onClose} style={{ marginLeft: '1rem' }}>キャンセル</button>

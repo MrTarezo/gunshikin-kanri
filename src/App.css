@@ -1,197 +1,203 @@
-/* ベース設定 */
+/* ========== ベース設定 ========== */
 body {
   margin: 0;
   font-family: 'Segoe UI', Roboto, sans-serif;
   background: linear-gradient(135deg, white, #ffffff);
   color: #333;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
-/* ヘッダー */
+/* ========== ヘッダー ========== */
 .app-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin: auto;
-  font-size: 1.2rem;
-  flex-wrap: wrap;
-  width: 100%;
-  padding: 0 10px;
-  box-sizing: border-box;
+  padding: 1rem;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  gap: 0.5rem;
+  text-align: center;
 }
-
-.app-header button {
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.app-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #555;
+}
+.header-user {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.header-user button {
   background-color: #ff6f61;
   color: white;
   border: none;
-  padding: 0.4rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 8px;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.85rem;
+  border-radius: 9999px;
   cursor: pointer;
-  transition: background-color 0.2s;
-  order: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
-.app-header button:hover {
+.header-user button:hover {
   background-color: #e65b50;
 }
 
-.app-header h1 {
-  font-size: 1.5rem;
-  color: #333;
-  margin: 0;
-  text-align: center;
-  white-space: normal;
-  flex-grow: 1;
-  max-width: 100%;
-  word-wrap: break-word;
-}
-
-.app-header p {
+/* ========== フィルター / 見出し ========== */
+h2 {
   font-size: 1rem;
+  font-weight: 600;
+  margin: 0.5rem;
   color: #333;
-  text-align: center;
-  margin: 0;
 }
 
-/* テーブルラッパー：横スクロール対応 */
-.expense-table-wrapper {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+/* ========== 一覧表示（カード型） ========== */
+.expense-group {
+  margin-top: 1rem;
+  padding: 0 0.5rem;
 }
-.expense-table-wrapper::-webkit-scrollbar {
-  display: none;
+.group-header {
+  font-weight: bold;
+  background-color: #eef;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
 }
-
-/* テーブル本体 */
-table {
-  width: 100%;
-  max-width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  margin: 0 auto;
-  font-size: 0.75rem;
-  box-sizing: border-box;
+.expense-card.expense {
+  background-color: #fff5f5;
 }
-
-th, td {
-  padding: 4px;
-  text-align: left;
-  border: 0.5px solid #ccc;
-  white-space: nowrap;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+.expense-card.income {
+  background-color: #f0fff4;
 }
-
-/* 金額列だけ右寄せ */
-td:nth-child(4), th:nth-child(4) {
-  text-align: right;
+.expense-title {
+  font-weight: bold;
+  font-size: 1rem;
 }
-
-/* 変更列の幅を狭く */
-td:last-child, th:last-child {
-  width: 70px;
-  padding: 4px 6px;
-}
-
-th {
-  background-color: #f4f4f4;
-}
-
-/* 収入・支出セルの背景だけ色分け（文字は黒） */
-td.income {
-  background-color: #e0ffe0;
-  color: #000;
-}
-
-td.expense {
-  background-color: #ffe0e0;
-  color: #000;
-}
-
-/* タイトル列：省略＋ツールチップ対応 */
-td.title {
-  max-width: 250px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-td[title] {
-  cursor: help;
-}
-
-/* アクションボタン */
-button.select-button {
-  padding: 0.2rem 0.4rem;
-  font-size: 0.7rem;
-  background-color: #4a90e2;
+.select-button {
+  background: #4a90e2;
   color: white;
   border: none;
   border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  margin: 0.2rem;
-  transition: background-color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-
-button.select-button:hover {
+.select-button:hover {
   background-color: #357ab8;
 }
 
-/* モーダルボタン */
-button.edit-button, button.delete-button, button.image-button {
-  padding: 0.4rem 0.8rem;
-  margin: 0.5rem;
+/* ========== タグ・アイコン ========== */
+.category-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin-right: 0.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.category-tag {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ========== モーダルボタン ========== */
+button.edit-button,
+button.delete-button,
+button.image-button {
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 0.25rem;
   font-size: 0.9rem;
   color: white;
   border: none;
   border-radius: 6px;
 }
-
 button.edit-button {
   background-color: #333;
 }
-
 button.delete-button {
   background-color: #f44336;
 }
-
 button.image-button {
   background-color: #4a90e2;
 }
 
-button:hover {
-  opacity: 0.85;
-}
-
-/* レスポンシブ調整 */
+/* ========== レスポンシブ ========== */
 @media (max-width: 600px) {
-  table {
-    font-size: 0.7rem;
+  .expense-row-text {
+    flex-direction: column;
+    align-items: flex-start;
   }
-
-  th, td {
-    padding: 4px;
-  }
-
-  td.actions button {
-    display: block;
-    margin-bottom: 5px;
+  .select-button {
+    align-self: flex-start;
+    margin-top: 0.5rem;
   }
 }
 
-/* h2見出し */
-h2 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #333;
-  margin: 0.5rem;
-  text-align: left;
+.expense-card {
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+.expense-card:hover {
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.app-container {
+  width: 100%;
+  max-width: 1000px;  /* または 90vw など */
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
 }
 
-.scrollable-cell {
-  max-width: 250px;
-  overflow-x: auto;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
+html, body, #root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
+
+.app-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.app-main {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.expense-group,
+.expense-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.header-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.header-logo img {
+  width: auto;         /* 大きめに */
+  height: 120px;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+

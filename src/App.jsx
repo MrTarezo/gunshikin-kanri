@@ -31,30 +31,31 @@ function App() {
   }, []);
 
   return (
-    <Authenticator>
-      {({ signOut }) => (
-        <Router>
-          <div className="app-container">
-            <header className="app-header">
-              <h1>💰軍資金💰</h1>
-              <h1>投入記録・支払原資紐付管理簿</h1>
-              <p>ようこそ、<strong>”{nickname}”</strong>さん
-              <button onClick={signOut}>サインアウト</button></p>
-            </header>
+<Authenticator>
+  {({ signOut }) => (
+    <Router>
+      <div className="app-container">
+      <header className="app-header">
+  <div className="header-logo">
+    <img src="/img/gunshikin-icon2.png" alt="軍資金アイコン" />
+  </div>
+  <div className="header-user">
+    <span>ようこそ、<strong>“{nickname}”</strong> さん</span>
+    <button onClick={signOut}>サインアウト</button>
+  </div>
+</header>
 
-            <nav className="app-nav">
-              <Link to="/">📋 記録一覧 📋</Link>
-            </nav>
 
-            <main className="app-main">
-              <Routes>
-                <Route path="/" element={<Home nickname={nickname} />} />
-              </Routes>
-            </main>
-          </div>
-        </Router>
-      )}
-    </Authenticator>
+        <main className="app-main">
+          <Routes>
+            <Route path="/" element={<Home nickname={nickname} />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+  )}
+</Authenticator>
+
   );
 }
 

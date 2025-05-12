@@ -14,7 +14,8 @@ const client = generateClient();
 export default function Home({ nickname }) {
   const [expenses, setExpenses] = useState([]);
   const [filter, setFilter] = useState('all');
-  const [selectedMonth, setSelectedMonth] = useState('all');
+  const nowMonth = new Date().toISOString().slice(0, 7); // '2025-05'
+  const [selectedMonth, setSelectedMonth] = useState(nowMonth); // ←ここを修正！
   const [selectedNickname, setSelectedNickname] = useState('all');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -22,6 +23,8 @@ export default function Home({ nickname }) {
   const [isSettlementMode, setIsSettlementMode] = useState(false); // 🔹精算モード
   const [imageUrl, setImageUrl] = useState('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  
 
   useEffect(() => {
     fetchExpenses();
@@ -35,8 +38,6 @@ export default function Home({ nickname }) {
       console.error('取得エラー:', err);
     }
   };
-
-  const nowMonth = new Date().toISOString().slice(0, 7); // 例: '2025-05'
 
   const sortedExpenses = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -93,6 +94,7 @@ export default function Home({ nickname }) {
         amount: parseFloat(editItem.amount),
         type: editItem.type,
         date: editItem.date,
+        category: editItem.category, 
       };
       const res = await client.graphql({ query: updateExpense, variables: { input } });
       setExpenses(prev =>
@@ -108,7 +110,6 @@ export default function Home({ nickname }) {
 
   return (
     <div>
-      <h2>🔹登録済みの支出一覧表</h2>
       <button onClick={() => setAddModalOpen(true)}>＋ 新規記録を追加</button>
 
       {/* 🔹精算モードトグル */}

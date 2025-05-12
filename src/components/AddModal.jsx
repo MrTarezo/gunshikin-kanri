@@ -118,9 +118,11 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         <select value={category} onChange={(e) => setCategory(e.target.value)} required>
           <option value="">カテゴリを選択</option>
           <option value="食費">食費</option>
-          <option value="交通費">交通費</option>
           <option value="日用品">日用品</option>
+          <option value="交通費">交通費</option>
           <option value="娯楽">娯楽</option>
+          <option value="外食">外食</option>
+          <option value="収入">収入</option>
           <option value="その他">その他</option>
         </select>
         <input
