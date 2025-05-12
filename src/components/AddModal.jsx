@@ -53,9 +53,9 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         type,
         date: new Date().toISOString().split('T')[0],
         receipt: imageKey,
-        category: category,
-        settled: false, 
-        settlementMonth: null
+        category,
+        settled: false,
+        settlementMonth: null,
       };
 
       const result = await client.graphql({
@@ -120,7 +120,6 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
           <option value="食費">食費</option>
           <option value="交通費">交通費</option>
           <option value="日用品">日用品</option>
-          <option value="外食">外食</option>
           <option value="娯楽">娯楽</option>
           <option value="その他">その他</option>
         </select>

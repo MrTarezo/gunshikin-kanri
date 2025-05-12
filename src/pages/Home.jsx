@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { listExpenses } from '../graphql/queries';
-import { createExpense, updateExpense, deleteExpense } from '../graphql/mutations';
-import { getUrl } from 'aws-amplify/storage';
-import Filters from '../components/Filters';
+import { updateExpense } from '../graphql/mutations';
 import ExpenseTable from '../components/ExpenseTable';
-import MonthlyChart from '../components/MonthlyChart';
-import EditModal from '../components/EditModal';
+import Filters from '../components/Filters';
 import AddModal from '../components/AddModal';
+import EditModal from '../components/EditModal';
+import MonthlyChart from '../components/MonthlyChart';
 import Modal from 'react-modal';
 
 const client = generateClient();
@@ -19,9 +18,10 @@ export default function Home({ nickname }) {
   const [selectedNickname, setSelectedNickname] = useState('all');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [isAddModalOpen, setAddModalOpen] = useState(false);
+  const [isSettlementMode, setIsSettlementMode] = useState(false); // 🔹精算モード
   const [imageUrl, setImageUrl] = useState('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isAddModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchExpenses();
@@ -29,62 +29,61 @@ export default function Home({ nickname }) {
 
   const fetchExpenses = async () => {
     try {
-      const result = await client.graphql({ query: listExpenses });
-      setExpenses(result.data.listExpenses.items);
+      const res = await client.graphql({ query: listExpenses });
+      setExpenses(res.data.listExpenses.items);
     } catch (err) {
       console.error('取得エラー:', err);
     }
   };
 
+  const nowMonth = new Date().toISOString().slice(0, 7); // 例: '2025-05'
+
   const sortedExpenses = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+
   const months = Array.from(new Set(expenses.map(e => e.date.slice(0, 7)))).sort();
   const nicknames = Array.from(new Set(expenses.map(e => e.paidBy))).filter(Boolean).sort();
 
   const filteredExpenses = sortedExpenses.filter(item =>
     (filter === 'all' || item.type === filter) &&
     (selectedMonth === 'all' || item.date.startsWith(selectedMonth)) &&
-    (selectedNickname === 'all' || item.paidBy === selectedNickname)
+    (selectedNickname === 'all' || item.paidBy === selectedNickname) &&
+    (!isSettlementMode || !item.settled) // 🔹未精算のみ
   );
+
+  const handleSettle = async () => {
+    if (!window.confirm('本当に精算しますか？')) return;
+
+    try {
+      const updated = await Promise.all(filteredExpenses.map(async (item) => {
+        const res = await client.graphql({
+          query: updateExpense,
+          variables: {
+            input: {
+              id: item.id,
+              settled: true,
+              settlementMonth: nowMonth
+            }
+          }
+        });
+        return res.data.updateExpense;
+      }));
+      alert(`${updated.length} 件を精算しました`);
+      fetchExpenses();
+    } catch (err) {
+      console.error('精算失敗:', err);
+      alert('精算中にエラーが発生しました');
+    }
+  };
 
   const totalAmount = filteredExpenses.reduce((sum, item) =>
     item.type === 'income' ? sum + item.amount : sum - item.amount, 0
   );
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('本当に削除しますか？')) return;
-    try {
-      await client.graphql({
-        query: deleteExpense,
-        variables: { input: { id } },
-      });
-      setExpenses(prev => prev.filter(item => item.id !== id));
-    } catch (err) {
-      console.error('削除エラー:', err);
-      alert('削除できませんでした');
-    }
+  const handleAdd = (item) => {
+    setExpenses(prev => [item, ...prev]);
+    setAddModalOpen(false);
   };
 
-  const handleEdit = (item) => {
-    setEditItem(item);
-    setIsEditModalOpen(true);
-  };
-
-  const handleImageOpen = async (key) => {
-    try {
-      console.log("🔑 stored key:", key);
-      const { url } = await getUrl({
-        path: key,
-        options: { accessLevel: 'protected',expiresIn: 60}  
-      });
-      console.log('📷 image URL:', url.href);
-      setImageUrl(url.href);
-      setIsImageModalOpen(true);
-    } catch (err) {
-      console.error('画像取得失敗:', err);
-      alert('画像の取得に失敗しました');
-    }
-  };  
-  
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -95,33 +94,39 @@ export default function Home({ nickname }) {
         type: editItem.type,
         date: editItem.date,
       };
-
-      const result = await client.graphql({
-        query: updateExpense,
-        variables: { input },
-      });
-
-      setExpenses((prev) =>
-        prev.map((item) => (item.id === editItem.id ? result.data.updateExpense : item))
+      const res = await client.graphql({ query: updateExpense, variables: { input } });
+      setExpenses(prev =>
+        prev.map(i => (i.id === editItem.id ? res.data.updateExpense : i))
       );
-
-      setIsEditModalOpen(false);
       setEditItem(null);
+      setIsEditModalOpen(false);
     } catch (err) {
       console.error('更新失敗:', err);
       alert('保存に失敗しました');
     }
   };
 
-  const handleAdd = (newItem) => {
-    setExpenses(prev => [newItem, ...prev]);
-    setAddModalOpen(false);
-  };
-
   return (
     <div>
-      <h2> 🔹登録済みの支出一覧表</h2>
+      <h2>🔹登録済みの支出一覧表</h2>
       <button onClick={() => setAddModalOpen(true)}>＋ 新規記録を追加</button>
+
+      {/* 🔹精算モードトグル */}
+      <label style={{ marginLeft: '1rem' }}>
+        <input
+          type="checkbox"
+          checked={isSettlementMode}
+          onChange={(e) => setIsSettlementMode(e.target.checked)}
+        />
+        精算モード
+      </label>
+
+      {/* 🔹精算ボタン */}
+      {isSettlementMode && filteredExpenses.length > 0 && (
+        <button onClick={handleSettle} style={{ marginLeft: '1rem', backgroundColor: '#4caf50', color: 'white', padding: '0.5rem' }}>
+          精算する
+        </button>
+      )}
 
       <Filters
         filter={filter}
@@ -136,16 +141,38 @@ export default function Home({ nickname }) {
 
       <ExpenseTable
         filteredExpenses={filteredExpenses}
-        handleImageOpen={handleImageOpen}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
+        handleImageOpen={(key) => {
+          import('aws-amplify/storage')
+            .then(({ getUrl }) =>
+              getUrl({ path: key, options: { accessLevel: 'protected' } })
+            )
+            .then(({ url }) => {
+              setImageUrl(url.href);
+              setIsImageModalOpen(true);
+            })
+            .catch(() => alert('画像取得失敗'));
+        }}
+      
+        handleEdit={(item) => {
+          setEditItem(item);
+          setIsEditModalOpen(true); // ← これを追加！
+        }}
+        handleDelete={async (id) => {
+          if (window.confirm('削除しますか？')) {
+            const res = await client.graphql({
+              query: require('../graphql/mutations').deleteExpense,
+              variables: { input: { id } },
+            });
+            setExpenses(prev => prev.filter(e => e.id !== id));
+          }
+        }}
       />
 
       <p>
         合計収支：
         <span style={{ color: totalAmount >= 0 ? 'green' : 'red' }}>
-        {totalAmount >= 0 ? '+' : ''}
-        {totalAmount.toLocaleString()}円
+          {totalAmount >= 0 ? '+' : ''}
+          {totalAmount.toLocaleString()}円
         </span>
       </p>
 
@@ -154,10 +181,7 @@ export default function Home({ nickname }) {
       {isEditModalOpen && editItem && (
         <EditModal
           editItem={editItem}
-          onClose={() => {
-            setEditItem(null);
-            setIsEditModalOpen(false);
-          }}
+          onClose={() => setIsEditModalOpen(false)}
           onChange={setEditItem}
           onSubmit={handleEditSubmit}
         />
@@ -177,17 +201,12 @@ export default function Home({ nickname }) {
           content: {
             top: '50%',
             left: '50%',
-            right: 'auto',
-            bottom: 'auto',
             transform: 'translate(-50%, -50%)',
             maxWidth: '90vw',
             maxHeight: '90vh',
             overflow: 'auto',
           },
-          overlay: {
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            zIndex: 9999,
-          }
+          overlay: { backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 9999 },
         }}
         ariaHideApp={false}
       >
