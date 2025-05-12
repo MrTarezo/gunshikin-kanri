@@ -72,7 +72,10 @@ export default function Home({ nickname }) {
   const handleImageOpen = async (key) => {
     try {
       console.log("🔑 stored key:", key);
-      const { url } = await getUrl({ path: key }); // ← decode しない
+      const { url } = await getUrl({
+        path: key,
+        options: { accessLevel: 'protected',expiresIn: 60}  
+      });
       console.log('📷 image URL:', url.href);
       setImageUrl(url.href);
       setIsImageModalOpen(true);
@@ -80,8 +83,7 @@ export default function Home({ nickname }) {
       console.error('画像取得失敗:', err);
       alert('画像の取得に失敗しました');
     }
-  };
-  
+  };  
   
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -139,7 +141,13 @@ export default function Home({ nickname }) {
         handleDelete={handleDelete}
       />
 
-      <p>合計収支：{totalAmount >= 0 ? '+' : ''}{totalAmount}円</p>
+      <p>
+        合計収支：
+        <span style={{ color: totalAmount >= 0 ? 'green' : 'red' }}>
+        {totalAmount >= 0 ? '+' : ''}
+        {totalAmount.toLocaleString()}円
+        </span>
+      </p>
 
       <MonthlyChart expenses={filteredExpenses} />
 

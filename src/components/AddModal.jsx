@@ -1,9 +1,8 @@
-// src/components/AddModal.jsx
 import { useState } from 'react';
 import Modal from 'react-modal';
 import { generateClient } from 'aws-amplify/api';
 import { createExpense } from '../graphql/mutations';
-import { uploadData } from 'aws-amplify/storage';
+import { uploadData } from '@aws-amplify/storage'; // ←ここ！
 
 const client = generateClient();
 
@@ -24,20 +23,23 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
     e.preventDefault();
 
     try {
-      let imageKey = null;
+      let imageKey = '';
 
       if (file) {
+        const today = new Date().toISOString().split('T')[0];
         const encodedFileName = encodeURIComponent(file.name);
-        const path = `receipts/${encodedFileName}`;
-
+        const s3Key = `receipts/${today}_${encodedFileName}`;
         const result = await uploadData({
-          path,
+          path: `receipts/${today}_${encodedFileName}`, // ✅ プレフィックス不要（Amplifyが付ける）
           data: file,
-          options: { contentType: file.type },
+          options: {
+            accessLevel: 'protected',
+            contentType: file.type,
+          },
         });
 
-        imageKey = result?.path || path;
-        console.log('画像アップロード成功: ', imageKey);
+        imageKey = result?.path || s3Key;
+        console.log('✅ 画像アップロード成功:', imageKey);
       }
 
       const input = {
@@ -47,7 +49,7 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         comment: '',
         type,
         date: new Date().toISOString().split('T')[0],
-        receipt: imageKey || '',
+        receipt: imageKey,
       };
 
       const result = await client.graphql({
@@ -55,14 +57,14 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         variables: { input },
       });
 
-      console.log('登録成功:', result.data.createExpense);
+      console.log('✅ 登録成功:', result.data.createExpense);
       alert('登録できました！');
 
-      onAdded(result.data.createExpense); // 一覧更新
+      onAdded(result.data.createExpense);
       resetForm();
-      onRequestClose(); // モーダルを閉じる
+      onRequestClose();
     } catch (error) {
-      console.error('登録失敗:', error);
+      console.error('❌ 登録失敗:', error);
       alert('エラーが発生しました');
     }
   };
@@ -74,13 +76,11 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
       contentLabel="記録追加"
       style={{
         content: {
-          top: '50%',
-          left: '50%',
-          right: 'auto',
-          bottom: 'auto',
-          transform: 'translate(-50%, -50%)',
-          maxWidth: '90vw',
-          padding: '2rem',
+          top: '40%',
+          left: '40%',
+          transform: 'translate(-20%, -20%)',
+          maxWidth: '1000vw',
+          padding: '1rem',
         },
         overlay: {
           backgroundColor: 'rgba(0,0,0,0.5)',

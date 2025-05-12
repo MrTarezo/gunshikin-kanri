@@ -70,7 +70,7 @@ const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDel
                 <div>{item.title}</div>
               </td>
               <td>{item.paidBy}</td>
-              <td>{item.amount}</td>
+              <td>{item.amount.toLocaleString()}円</td>
               <td>
                 <button 
                   className="select-button" 
