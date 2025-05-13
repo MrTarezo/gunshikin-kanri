@@ -48,12 +48,13 @@ const ExpenseTable = ({ filteredExpenses, handleImageOpen, handleEdit, handleDel
               key={item.id}
               className={`expense-card ${item.type === 'income' ? 'income' : 'expense'}`}
               onClick={() => openModal(item)}
+              style={{ overflowX: 'auto', whiteSpace: 'nowrap' }} // 👈 inline指定も可能
             >
-             {categoryIcons[item.category]}
-                <span className="expense-line">
+              {categoryIcons[item.category]}
+              <span className="expense-line">
                 ｜{item.title} ｜ {item.paidBy} ｜ {item.amount.toLocaleString()}円
-                </span>
-              </div>
+              </span>
+            </div>
           ))}
         </div>
       ))}

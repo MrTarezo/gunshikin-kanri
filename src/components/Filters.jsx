@@ -15,7 +15,7 @@ const Filters = ({ filter, setFilter, selectedMonth, setSelectedMonth, selectedN
     </select>
 
     <select value={selectedNickname} onChange={(e) => setSelectedNickname(e.target.value)}>
-      <option value="all">すべての入力者</option>
+      <option value="all">すべての人</option>
       {nicknames.map((n) => <option key={n} value={n}>{n}</option>)}
     </select>
   </div>

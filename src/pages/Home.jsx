@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { listExpenses} from '../graphql/queries';
+import { listExpenses } from '../graphql/queries';
 import { updateExpense, deleteExpense as deleteExpenseMutation } from '../graphql/mutations';
 import ExpenseTable from '../components/ExpenseTable';
 import Filters from '../components/Filters';
 import AddModal from '../components/AddModal';
 import EditModal from '../components/EditModal';
 import MonthlyChart from '../components/MonthlyChart';
-import CategoryPieChart from '../components/CategoryPieChart'; 
+import CategoryPieChart from '../components/CategoryPieChart';
+import ExpenseCalendar from '../components/ExpenseCalendar';
 import Modal from 'react-modal';
 
 const client = generateClient();
@@ -25,6 +26,7 @@ export default function Home({ nickname }) {
   const [imageUrl, setImageUrl] = useState('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [showPieChart, setShowPieChart] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     fetchExpenses();
@@ -115,41 +117,53 @@ export default function Home({ nickname }) {
 
   return (
     <div>
-      <button onClick={() => setAddModalOpen(true)}>＋ 新規記録</button>
+      <button onClick={() => setAddModalOpen(true)}>＋ 新規登録</button>
       <button onClick={() => setShowPieChart(prev => !prev)} style={{ marginLeft: '0.5rem' }}>
-        {showPieChart ? ' ◀ 戻る' : '🔍 支出分析'}
+        {showPieChart ? ' ◀ 戻る' : '📊 支出分析'}
       </button>
-      <label style={{ marginLeft: '1rem' }}>
-        <input
-          type="checkbox"
-          checked={isSettlementMode}
-          onChange={(e) => setIsSettlementMode(e.target.checked)}
+      <button onClick={() => setShowCalendar(prev => !prev)} style={{ marginLeft: '0.5rem' }}>
+        {showCalendar ? ' ◀ 戻る' : '📅  暦 '}
+      </button>
+
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+      }}>
+        <Filters
+          filter={filter}
+          setFilter={setFilter}
+          selectedMonth={selectedMonth}
+          setSelectedMonth={setSelectedMonth}
+          selectedNickname={selectedNickname}
+          setSelectedNickname={setSelectedNickname}
+          months={months}
+          nicknames={nicknames}
         />
-        精算
-      </label>
+        <label style={{ marginLeft: '1rem', whiteSpace: 'nowrap' }}>
+          <input
+            type="checkbox"
+            checked={isSettlementMode}
+            onChange={(e) => setIsSettlementMode(e.target.checked)}
+          />
+          精算
+        </label>
+      </div>
 
       {isSettlementMode && filteredExpenses.length > 0 && (
         <button
           onClick={handleSettle}
-          style={{ marginLeft: '1rem', backgroundColor: '#4caf50', color: 'white', padding: '0.5rem' }}
+          style={{ marginTop: '0.5rem', backgroundColor: '#4caf50', color: 'white', padding: '0.5rem' }}
         >
           精算する
         </button>
       )}
 
-      <Filters
-        filter={filter}
-        setFilter={setFilter}
-        selectedMonth={selectedMonth}
-        setSelectedMonth={setSelectedMonth}
-        selectedNickname={selectedNickname}
-        setSelectedNickname={setSelectedNickname}
-        months={months}
-        nicknames={nicknames}
-      />
-
       {showPieChart ? (
         <CategoryPieChart expenses={filteredExpenses} />
+      ) : showCalendar ? (
+        <ExpenseCalendar expenses={filteredExpenses} />
       ) : (
         <>
           <ExpenseTable

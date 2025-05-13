@@ -249,3 +249,21 @@ button.image-button {
   flex-shrink: 0;
 }
 
+.expense-table-wrapper {
+  overflow-x: auto;      /* 👈 横スクロール有効化 */
+  -webkit-overflow-scrolling: touch; /* iOS スクロールスムーズ対応 */
+}
+
+.expense-card {
+  white-space: nowrap;   /* 👈 一行にする（折り返さない） */
+  padding: 0.5rem;
+}
+
+.expense-group {
+  overflow-x: auto;
+}
+
+.expense-card {
+  min-width: max-content; /* ← 必須！内容に応じて横幅を広げる */
+  font-size: 0.8rem;      /* ← 字を少し小さく調整 */
+}

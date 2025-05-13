@@ -42,7 +42,6 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
   return (
     <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontSize={15} fill="#333">
       {`${icon} ${name} ${(percent * 100).toFixed(0)}%`}
-      <tspan x={x} y={y + 12}>{`¥${value.toLocaleString()}`}</tspan>
     </text>
   );
 };
