@@ -48,8 +48,8 @@ export default function MonthlyChart({ expenses }) {
 
   // 支出者別の色
   const expenseColors = {
-    "チマエフ": "#e74c3c",  // チマエフの支出：赤
-    "おもち軍曹": "#f39c12"// おもち軍曹の支出：薄い赤
+    "ポー": "#e74c3c",   // ポーの支出：赤
+    "モンチ": "#f39c12" // モンチの支出：オレンジ
   };
 
   return (
@@ -62,28 +62,28 @@ export default function MonthlyChart({ expenses }) {
           <YAxis />
           <Tooltip />
           <Legend />
-          {/* 収入は重ねず単独の棒グラフ */}
+          {/* 収入 */}
           <Bar dataKey="income" fill="#82ca9d" name="収入" />
-          {/* チマエフの支出 */}
+          {/* ポーの支出 */}
           <Bar 
-            dataKey="expense.チマエフ" 
-            fill={expenseColors["チマエフ"]} 
-            name="支出（チマエフ）"
+            dataKey="expense.ポー" 
+            fill={expenseColors["ポー"]} 
+            name="支出（ポー）"
             stroke="#ff6666"
             strokeWidth={2}
             fillOpacity={0.7}
-            stackId="a" // チマエフの支出を重ねて表示
+            stackId="a"
           />
-          {/* おもち軍曹の支出 */}
+          {/* モンチの支出 */}
           <Bar 
-            dataKey="expense.おもち軍曹" 
-            fill={expenseColors["おもち軍曹"]} 
-            name="支出（おもち軍曹）" 
+            dataKey="expense.モンチ" 
+            fill={expenseColors["モンチ"]} 
+            name="支出（モンチ）" 
             stroke="#ffcccc"
             strokeWidth={2}
             fillOpacity={0.7}
-            stackId="a" // おもち軍曹の支出を重ねて表示
-            strokeDasharray="5 5"  // 点線の効果
+            stackId="a"
+            strokeDasharray="5 5"
           />
           <Line type="monotone" dataKey="balance" stroke="#8884d8" name="余剰金" />
         </ComposedChart>
