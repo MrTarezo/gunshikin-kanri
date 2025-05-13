@@ -59,7 +59,7 @@ export default function EditModal({ editItem, onClose, onChange, onSubmit }) {
             transform: 'translate(-50%, -50%)',
             maxWidth: '500px',
             width: '90vw',
-            maxHeight: '100vh',
+            minHeight: '500px',
             overflow: 'auto',
             padding: '1rem',
             borderRadius: '12px',
