@@ -117,13 +117,21 @@ export default function Home({ nickname }) {
 
   return (
     <div>
-      <button onClick={() => setAddModalOpen(true)}>＋ 新規登録</button>
-      <button onClick={() => setShowPieChart(prev => !prev)} style={{ marginLeft: '0.5rem' }}>
-        {showPieChart ? ' ◀ 戻る' : '📊 支出分析'}
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',  // 👈 中央揃え
+      gap: '0.5rem',             // 👈 ボタン間の余白
+      flexWrap: 'wrap',          // 👈 スマホ対応で折り返し
+      marginBottom: '1rem',
+    }}>
+      <button onClick={() => setAddModalOpen(true)}>➕新規登録</button>
+      <button onClick={() => setShowPieChart(prev => !prev)}>
+        {showPieChart ? ' ◀ 戻る' :'📈支出分析'}
       </button>
-      <button onClick={() => setShowCalendar(prev => !prev)} style={{ marginLeft: '0.5rem' }}>
-        {showCalendar ? ' ◀ 戻る' : '📅  暦 '}
+      <button onClick={() => setShowCalendar(prev => !prev)}>
+        {showCalendar ? ' ◀ 戻る' : '📅　暦　'}
       </button>
+    </div>
 
       <div style={{
         display: 'flex',

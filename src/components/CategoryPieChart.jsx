@@ -1,5 +1,3 @@
-// src/components/CategoryPieChart.jsx
-
 import React from 'react';
 import {
   PieChart,
@@ -10,28 +8,8 @@ import {
   ResponsiveContainer,
   Label,
 } from 'recharts';
+import { categoryColors, categoryIcons } from '../common/categoryMap';
 
-// カテゴリごとの固定色
-const categoryColors = {
-  食費: '#FF6384',
-  日用品: '#36A2EB',
-  交通費: '#FFCE56',
-  娯楽: '#8BC34A',
-  外食: '#FF9800',
-  その他: '#9C27B0',
-};
-
-// カテゴリごとのアイコン
-const categoryIcons = {
-  食費: '🍚',
-  日用品: '🧻',
-  交通費: '🚃',
-  娯楽: '🚬',
-  外食: '🍣',
-  その他: '❓',
-};
-
-// カスタムラベル（アイコン＋％、下段に金額）
 const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
@@ -47,7 +25,6 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
 };
 
 export default function CategoryPieChart({ expenses }) {
-  // 支出のみに限定してカテゴリ別に集計
   const categoryTotals = expenses
     .filter(item => item.type === 'expense')
     .reduce((acc, item) => {
