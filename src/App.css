@@ -7,6 +7,25 @@ body {
   font-size: 0.9rem;
 }
 
+html, body, #root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.app-main {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* ========== ヘッダー ========== */
 .app-header {
   display: flex;
@@ -49,6 +68,20 @@ body {
   background-color: #e65b50;
 }
 
+/* ========== ロゴ ========== */
+.header-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+.header-logo img {
+  width: auto;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
 /* ========== フィルター / 見出し ========== */
 h2 {
   font-size: 1rem;
@@ -69,16 +102,79 @@ h2 {
   border-radius: 4px;
   font-size: 0.9rem;
 }
+
+.expense-card {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
+  border-radius: 10px;
+  min-height: 56px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+.expense-card:hover {
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 .expense-card.expense {
   background-color: #fff5f5;
 }
 .expense-card.income {
   background-color: #f0fff4;
 }
-.expense-title {
-  font-weight: bold;
-  font-size: 1rem;
+
+/* ========== 行内の配置 ========== */
+.expense-row-text {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
 }
+
+.category-tag {
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  flex-shrink: 0;
+}
+
+.expense-columns {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.expense-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1rem;
+  min-width: 0;
+}
+
+.expense-cell.title {
+  flex: 2;
+}
+.expense-cell.paid-by {
+  flex: 1;
+  text-align: center;
+}
+.expense-cell.amount {
+  flex: none;
+  min-width: 70px;
+  text-align: right;
+  font-weight: bold;
+  color: #333;
+}
+
+/* ========== ボタン系 ========== */
 .select-button {
   background: #4a90e2;
   color: white;
@@ -93,26 +189,6 @@ h2 {
 .select-button:hover {
   background-color: #357ab8;
 }
-
-/* ========== タグ・アイコン ========== */
-.category-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
-  margin-right: 0.5rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-.category-tag {
-  font-size: 1.4rem;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ========== モーダルボタン ========== */
 button.edit-button,
 button.delete-button,
 button.image-button {
@@ -133,74 +209,7 @@ button.image-button {
   background-color: #4a90e2;
 }
 
-/* ========== レスポンシブ ========== */
-@media (max-width: 600px) {
-  .expense-row-text {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .select-button {
-    align-self: flex-start;
-    margin-top: 0.5rem;
-  }
-}
-
-.expense-card {
-  margin-bottom: 0.2rem;
-  cursor: pointer;
-  transition: background-color 0.2s, box-shadow 0.2s;
-}
-.expense-card:hover {
-  background-color: #f9f9f9;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-.app-container {
-  width: 100%;
-  max-width: 1000px;  /* または 90vw など */
-  margin: 0 auto;
-  padding: 0 1rem;
-  box-sizing: border-box;
-}
-
-html, body, #root {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.app-container {
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 1rem;
-  box-sizing: border-box;
-}
-
-.app-main {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.expense-group,
-.expense-card {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.header-logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 0.5rem;
-}
-
-.header-logo img {
-  width: auto;         /* 大きめに */
-  height: 120px;
-  object-fit: contain;
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-}
-
+/* ========== サマリーボックス ========== */
 .summary-box {
   background: #f9f9f9;
   padding: 0.5rem;
@@ -211,4 +220,32 @@ html, body, #root {
   margin-top: 2.5rem;
 }
 
+/* ========== レスポンシブ ========== */
+@media (max-width: 600px) {
+  .expense-row-text {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .expense-columns {
+    width: 100%;
+  }
+  .select-button {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+  }
+}.expense-line {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.expense-row-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.category-tag {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
 

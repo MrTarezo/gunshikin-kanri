@@ -1,22 +1,78 @@
+import { useState } from 'react';
+import Modal from 'react-modal';
+
 export default function EditModal({ editItem, onClose, onChange, onSubmit }) {
   if (!editItem) return null;
 
   const handleChange = (field, value) => {
     onChange({ ...editItem, [field]: value });
   };
-  
+
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
-      justifyContent: 'center', alignItems: 'center', zIndex: 1000
-    }}>
-      <div style={{
-        backgroundColor: '#fff', padding: '1rem', borderRadius: '8px',
-        minWidth: '300px'
-      }}>
-        <h3>編集モード</h3>
-        <form onSubmit={onSubmit}>
+    <>
+      <style>
+        {`
+          .edit-form input,
+          .edit-form select {
+            display: block;
+            width: 100%;
+            padding: 0.6rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            min-height: 44px;
+          }
+
+          .edit-form button {
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            background-color: black;
+            color: white;
+            cursor: pointer;
+          }
+
+          .edit-form button:hover {
+            background-color: #3e8e41;
+          }
+
+          .edit-form .button-row {
+            display: flex;
+            justify-content: flex-start;
+            gap: 1rem;
+            margin-top: 1.0rem;
+          }
+        `}
+      </style>
+
+      <Modal
+        isOpen={true}
+        onRequestClose={onClose}
+        contentLabel="編集モード"
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            maxWidth: '500px',
+            width: '90vw',
+            maxHeight: '100vh',
+            overflow: 'auto',
+            padding: '1rem',
+            borderRadius: '12px',
+          },
+          overlay: {
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 1000,
+          },
+        }}
+        ariaHideApp={false}
+      >
+        <h2>編集モード</h2>
+        <form onSubmit={onSubmit} className="edit-form">
           <input
             type="date"
             value={editItem.date}
@@ -41,12 +97,8 @@ export default function EditModal({ editItem, onClose, onChange, onSubmit }) {
           </select>
           <select
             value={editItem.category}
-            onChange={(e) => {
-              console.log('editItem.category:', editItem.category);
-              handleChange('category', e.target.value);
-            }}
+            onChange={(e) => handleChange('category', e.target.value)}
             required
-            style={{ marginTop: '0.5rem' }}
           >
             <option value="">カテゴリを選択</option>
             <option value="食費">食費</option>
@@ -57,13 +109,12 @@ export default function EditModal({ editItem, onClose, onChange, onSubmit }) {
             <option value="収入">収入</option>
             <option value="その他">その他</option>
           </select>
-
-          <div style={{ marginTop: '1rem' }}>
+          <div className="button-row">
             <button type="submit">保存</button>
-            <button type="button" onClick={onClose} style={{ marginLeft: '1rem' }}>キャンセル</button>
+            <button type="button" onClick={onClose}>キャンセル</button>
           </div>
         </form>
-      </div>
-    </div>
+      </Modal>
+    </>
   );
 }

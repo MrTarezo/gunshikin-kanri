@@ -1,3 +1,4 @@
+// src/components/AddModal.jsx
 
 import { useState } from 'react';
 import Modal from 'react-modal';
@@ -22,6 +23,16 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
     setFile(null);
   };
 
+  const handleTypeChange = (e) => {
+    const newType = e.target.value;
+    setType(newType);
+    if (newType === 'income') {
+      setCategory('収入');
+    } else {
+      setCategory('');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -43,6 +54,7 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         console.log('✅ 画像アップロード成功:', imageKey);
       }
 
+      // 安全策としてバックエンド送信時にも category を強制上書き
       const input = {
         title,
         amount: parseFloat(amount),
@@ -51,7 +63,7 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         type,
         date: new Date().toISOString().split('T')[0],
         receipt: imageKey,
-        category,
+        category: type === 'income' ? '収入' : category,
         settled: false,
         settlementMonth: null,
       };
@@ -94,7 +106,7 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
             font-size: 1rem;
             border: none;
             border-radius: 6px;
-            background-color: #4caf50;
+            background-color: black;
             color: white;
             cursor: pointer;
           }
@@ -107,7 +119,7 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
             display: flex;
             justify-content: flex-start;
             gap: 1rem;
-            margin-top: 1.5rem;
+            margin-top: 1.0rem;
           }
         `}
       </style>
@@ -123,7 +135,9 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
             transform: 'translate(-50%, -50%)',
             maxWidth: '500px',
             width: '90vw',
-            padding: '2rem',
+            maxHeight: '100vh',
+            overflow: 'auto',
+            padding: '1rem',
             borderRadius: '12px',
           },
           overlay: {
@@ -149,11 +163,16 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
             onChange={(e) => setAmount(e.target.value)}
             required
           />
-          <select value={type} onChange={(e) => setType(e.target.value)}>
+          <select value={type} onChange={handleTypeChange}>
             <option value="expense">自腹</option>
             <option value="income">収入</option>
           </select>
-          <select value={category} onChange={(e) => setCategory(e.target.value)} required>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+            disabled={type === 'income'}
+          >
             <option value="">カテゴリを選択</option>
             <option value="食費">食費</option>
             <option value="日用品">日用品</option>

@@ -117,7 +117,7 @@ export default function Home({ nickname }) {
     <div>
       <button onClick={() => setAddModalOpen(true)}>＋ 新規記録</button>
       <button onClick={() => setShowPieChart(prev => !prev)} style={{ marginLeft: '0.5rem' }}>
-        {showPieChart ? '📊 戻る' : '📈 カテゴリ分析'}
+        {showPieChart ? ' ◀ 戻る' : '🔍 支出分析'}
       </button>
       <label style={{ marginLeft: '1rem' }}>
         <input
