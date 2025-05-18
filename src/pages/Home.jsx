@@ -226,25 +226,43 @@ export default function Home({ nickname }) {
         />
       )}
 
-      <Modal
-        isOpen={isImageModalOpen}
-        onRequestClose={() => setIsImageModalOpen(false)}
-        style={{
-          content: {
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            maxWidth: '90vw',
-            maxHeight: '90vh',
-            overflow: 'auto',
-          },
-          overlay: { backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 9999 },
-        }}
-        ariaHideApp={false}
-      >
-        <img src={imageUrl} alt="画像" style={{ maxWidth: '100%', maxHeight: '80vh' }} />
-        <button onClick={() => setIsImageModalOpen(false)} style={{ marginTop: '1rem' }}>閉じる</button>
-      </Modal>
+<Modal
+  isOpen={isImageModalOpen}
+  onRequestClose={() => setIsImageModalOpen(false)}
+  style={{
+    content: {
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '95vw',             // 画面幅の95%
+      height: '90vh',            // 画面高の90%
+      padding: '1rem',
+      backgroundColor: '#fff',
+      borderRadius: '10px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    overlay: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      zIndex: 9999,
+    },
+  }}
+  ariaHideApp={false}
+>
+  <img
+    src={imageUrl}
+    alt="画像"
+    style={{
+      maxWidth: '100%',
+      maxHeight: '80vh',
+      objectFit: 'contain',
+    }}
+  />
+  <button onClick={() => setIsImageModalOpen(false)} style={{ marginTop: '1rem' }}>閉じる</button>
+</Modal>
+
     </div>
   );
 }
