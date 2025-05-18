@@ -10,15 +10,16 @@ import {
   Line,
   ComposedChart,
 } from 'recharts';
+import { useMemo } from 'react';
 
 export default function MonthlyChart({ expenses }) {
   // 月ごとに支出・収入を分類して集計
   const monthlyMap = {};
 
   expenses.forEach((item) => {
-    const month = item.date.slice(0, 7); // "YYYY-MM"
+    const month = item.date.slice(0, 7);
     if (!monthlyMap[month]) {
-      monthlyMap[month] = { month, income: 0, expense: {} }; // 支出を入力者別に管理
+      monthlyMap[month] = { month, income: 0, expense: {} };
     }
 
     if (item.type === 'income') {
@@ -31,7 +32,32 @@ export default function MonthlyChart({ expenses }) {
     }
   });
 
-  // 累積収支を計算しながら配列化
+  // 支出者リストを取得
+  const uniqueUsers = useMemo(() => {
+    const users = new Set();
+    expenses.forEach((item) => {
+      if (item.type === 'expense') users.add(item.paidBy);
+    });
+    return Array.from(users);
+  }, [expenses]);
+
+  // 支出者ごとの色（赤系ランダム）
+  const expenseColors = useMemo(() => {
+    const getRandomRed = () => {
+      const red = 200 + Math.floor(Math.random() * 56);   // 200〜255
+      const green = Math.floor(Math.random() * 80);       // 0〜80
+      const blue = Math.floor(Math.random() * 80);        // 0〜80
+      return `rgb(${red},${green},${blue})`;
+    };
+
+    const map = {};
+    uniqueUsers.forEach((user) => {
+      map[user] = getRandomRed();
+    });
+    return map;
+  }, [uniqueUsers]);
+
+  // チャートデータ整形
   const sortedMonths = Object.keys(monthlyMap).sort();
   let cumulative = 0;
   const chartData = sortedMonths.map((month) => {
@@ -41,16 +67,12 @@ export default function MonthlyChart({ expenses }) {
     return {
       month,
       income,
-      expense,
+      ...Object.fromEntries(
+        uniqueUsers.map((user) => [`expense.${user}`, expense[user] || 0])
+      ),
       balance: cumulative,
     };
   });
-
-  // 支出者別の色
-  const expenseColors = {
-    "ポー": "#e74c3c",   // ポーの支出：赤
-    "モンチ": "#f39c12" // モンチの支出：オレンジ
-  };
 
   return (
     <div style={{ width: '100%', height: 350 }}>
@@ -62,29 +84,19 @@ export default function MonthlyChart({ expenses }) {
           <YAxis />
           <Tooltip />
           <Legend />
-          {/* 収入 */}
           <Bar dataKey="income" fill="#82ca9d" name="収入" />
-          {/* ポーの支出 */}
-          <Bar 
-            dataKey="expense.ポー" 
-            fill={expenseColors["ポー"]} 
-            name="支出（ポー）"
-            stroke="#ff6666"
-            strokeWidth={2}
-            fillOpacity={0.7}
-            stackId="a"
-          />
-          {/* モンチの支出 */}
-          <Bar 
-            dataKey="expense.モンチ" 
-            fill={expenseColors["モンチ"]} 
-            name="支出（モンチ）" 
-            stroke="#ffcccc"
-            strokeWidth={2}
-            fillOpacity={0.7}
-            stackId="a"
-            strokeDasharray="5 5"
-          />
+          {uniqueUsers.map((user) => (
+            <Bar
+              key={user}
+              dataKey={`expense.${user}`}
+              fill={expenseColors[user]}
+              name={`支出（${user}）`}
+              stackId="a"
+              fillOpacity={0.7}
+              stroke="#ffaaaa"
+              strokeWidth={2}
+            />
+          ))}
           <Line type="monotone" dataKey="balance" stroke="#8884d8" name="余剰金" />
         </ComposedChart>
       </ResponsiveContainer>
