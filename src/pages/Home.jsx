@@ -123,31 +123,31 @@ export default function Home({ nickname }) {
       <div style={{
         display: 'flex',
         justifyContent: 'center',
-        gap: '0.3rem',
+        gap: '0.2rem',
         flexWrap: 'wrap',
         marginBottom: '1rem',
       }}>
-        <button onClick={() => setAddModalOpen(true)}>➕新規</button>
+        <button onClick={() => setAddModalOpen(true)}> ➕ </button>
         <button onClick={() => {
           setShowPieChart(prev => !prev);
           setShowCalendar(false);
           setShowTodo(false);
         }}>
-          {showPieChart ? '◀ 戻る' : '📈分析'}
+          {showPieChart ? '◀' : '📈分析'}
         </button>
         <button onClick={() => {
           setShowCalendar(prev => !prev);
           setShowPieChart(false);
           setShowTodo(false);
         }}>
-          {showCalendar ? '◀ 戻る' : '📅 暦'}
+          {showCalendar ? '◀' : '📅暦'}
         </button>
         <button onClick={() => {
           setShowTodo(prev => !prev);
           setShowPieChart(false);
           setShowCalendar(false);
         }}>
-          {showTodo ? '◀ 戻る' : '✅ToDo'}
+          {showTodo ? '◀' : '✅タスク'}
         </button>
       </div>
 
