@@ -95,7 +95,13 @@ export default function TodoList({ nickname }) {
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          style={{ padding: '0.5rem', backgroundColor: '#fff', color: '#333' }}
+          style={{
+            padding: '0.5rem',
+            backgroundColor: '#fff',
+            color: '#333',
+            border: '1px solid #ccc',
+            borderRadius: '6px'
+          }}
         />
         <select
           value={assignee}
