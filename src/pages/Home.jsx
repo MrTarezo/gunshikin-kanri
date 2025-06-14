@@ -123,7 +123,7 @@ export default function Home({ nickname }) {
       <div style={{
         display: 'flex',
         justifyContent: 'center',
-        gap: '0.5rem',
+        gap: '0.3rem',
         flexWrap: 'wrap',
         marginBottom: '1rem',
       }}>
@@ -147,7 +147,7 @@ export default function Home({ nickname }) {
           setShowPieChart(false);
           setShowCalendar(false);
         }}>
-          {showTodo ? '◀ 戻る' : '📝 ToDo'}
+          {showTodo ? '◀ 戻る' : '✅ToDo'}
         </button>
       </div>
 
