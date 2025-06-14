@@ -95,6 +95,7 @@ export default function TodoList({ nickname }) {
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
+          placeholder='期限'
           style={{
             padding: '0.5rem',
             backgroundColor: '#fff',
