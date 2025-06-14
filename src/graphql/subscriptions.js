@@ -97,3 +97,48 @@ export const onDeleteReceipt = /* GraphQL */ `
     }
   }
 `;
+export const onCreateTodo = /* GraphQL */ `
+  subscription OnCreateTodo($filter: ModelSubscriptionTodoFilterInput) {
+    onCreateTodo(filter: $filter) {
+      id
+      title
+      done
+      owner
+      dueDate
+      assignee
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateTodo = /* GraphQL */ `
+  subscription OnUpdateTodo($filter: ModelSubscriptionTodoFilterInput) {
+    onUpdateTodo(filter: $filter) {
+      id
+      title
+      done
+      owner
+      dueDate
+      assignee
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteTodo = /* GraphQL */ `
+  subscription OnDeleteTodo($filter: ModelSubscriptionTodoFilterInput) {
+    onDeleteTodo(filter: $filter) {
+      id
+      title
+      done
+      owner
+      dueDate
+      assignee
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;

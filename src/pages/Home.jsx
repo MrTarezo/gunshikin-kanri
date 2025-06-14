@@ -9,6 +9,7 @@ import EditModal from '../components/EditModal';
 import MonthlyChart from '../components/MonthlyChart';
 import CategoryPieChart from '../components/CategoryPieChart';
 import ExpenseCalendar from '../components/ExpenseCalendar';
+import TodoList from '../components/TodoList'; // 👈 追加
 import Modal from 'react-modal';
 
 const client = generateClient();
@@ -27,6 +28,7 @@ export default function Home({ nickname }) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [showPieChart, setShowPieChart] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showTodo, setShowTodo] = useState(false); // 👈 追加
 
   useEffect(() => {
     fetchExpenses();
@@ -117,47 +119,66 @@ export default function Home({ nickname }) {
 
   return (
     <div>
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',  // 👈 中央揃え
-      gap: '0.5rem',             // 👈 ボタン間の余白
-      flexWrap: 'wrap',          // 👈 スマホ対応で折り返し
-      marginBottom: '1rem',
-    }}>
-      <button onClick={() => setAddModalOpen(true)}>➕新規登録</button>
-      <button onClick={() => setShowPieChart(prev => !prev)}>
-        {showPieChart ? ' ◀ 戻る' :'📈支出分析'}
-      </button>
-      <button onClick={() => setShowCalendar(prev => !prev)}>
-        {showCalendar ? ' ◀ 戻る' : '📅　暦　'}
-      </button>
-    </div>
-
+      {/* ボタン類 */}
       <div style={{
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
+        gap: '0.5rem',
         flexWrap: 'wrap',
+        marginBottom: '1rem',
       }}>
-        <Filters
-          filter={filter}
-          setFilter={setFilter}
-          selectedMonth={selectedMonth}
-          setSelectedMonth={setSelectedMonth}
-          selectedNickname={selectedNickname}
-          setSelectedNickname={setSelectedNickname}
-          months={months}
-          nicknames={nicknames}
-        />
-        <label style={{ marginLeft: '1rem', whiteSpace: 'nowrap' }}>
-          <input
-            type="checkbox"
-            checked={isSettlementMode}
-            onChange={(e) => setIsSettlementMode(e.target.checked)}
-          />
-          精算
-        </label>
+        <button onClick={() => setAddModalOpen(true)}>➕新規</button>
+        <button onClick={() => {
+          setShowPieChart(prev => !prev);
+          setShowCalendar(false);
+          setShowTodo(false);
+        }}>
+          {showPieChart ? '◀ 戻る' : '📈分析'}
+        </button>
+        <button onClick={() => {
+          setShowCalendar(prev => !prev);
+          setShowPieChart(false);
+          setShowTodo(false);
+        }}>
+          {showCalendar ? '◀ 戻る' : '📅 暦'}
+        </button>
+        <button onClick={() => {
+          setShowTodo(prev => !prev);
+          setShowPieChart(false);
+          setShowCalendar(false);
+        }}>
+          {showTodo ? '◀ 戻る' : '📝 ToDo'}
+        </button>
       </div>
+
+      {/* フィルター・精算 */}
+      {!showTodo && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+        }}>
+          <Filters
+            filter={filter}
+            setFilter={setFilter}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            selectedNickname={selectedNickname}
+            setSelectedNickname={setSelectedNickname}
+            months={months}
+            nicknames={nicknames}
+          />
+          <label style={{ marginLeft: '1rem', whiteSpace: 'nowrap' }}>
+            <input
+              type="checkbox"
+              checked={isSettlementMode}
+              onChange={(e) => setIsSettlementMode(e.target.checked)}
+            />
+            精算
+          </label>
+        </div>
+      )}
 
       {isSettlementMode && filteredExpenses.length > 0 && (
         <button
@@ -168,10 +189,13 @@ export default function Home({ nickname }) {
         </button>
       )}
 
+      {/* メイン表示切替 */}
       {showPieChart ? (
         <CategoryPieChart expenses={filteredExpenses} />
       ) : showCalendar ? (
         <ExpenseCalendar expenses={filteredExpenses} />
+      ) : showTodo ? (
+        <TodoList nickname={nickname} />
       ) : (
         <>
           <ExpenseTable
@@ -226,43 +250,42 @@ export default function Home({ nickname }) {
         />
       )}
 
-<Modal
-  isOpen={isImageModalOpen}
-  onRequestClose={() => setIsImageModalOpen(false)}
-  style={{
-    content: {
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '95vw',             // 画面幅の95%
-      height: '90vh',            // 画面高の90%
-      padding: '1rem',
-      backgroundColor: '#fff',
-      borderRadius: '10px',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    overlay: {
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      zIndex: 9999,
-    },
-  }}
-  ariaHideApp={false}
->
-  <img
-    src={imageUrl}
-    alt="画像"
-    style={{
-      maxWidth: '100%',
-      maxHeight: '80vh',
-      objectFit: 'contain',
-    }}
-  />
-  <button onClick={() => setIsImageModalOpen(false)} style={{ marginTop: '1rem' }}>閉じる</button>
-</Modal>
-
+      <Modal
+        isOpen={isImageModalOpen}
+        onRequestClose={() => setIsImageModalOpen(false)}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '95vw',
+            height: '90vh',
+            padding: '1rem',
+            backgroundColor: '#fff',
+            borderRadius: '10px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            zIndex: 9999,
+          },
+        }}
+        ariaHideApp={false}
+      >
+        <img
+          src={imageUrl}
+          alt="画像"
+          style={{
+            maxWidth: '100%',
+            maxHeight: '80vh',
+            objectFit: 'contain',
+          }}
+        />
+        <button onClick={() => setIsImageModalOpen(false)} style={{ marginTop: '1rem' }}>閉じる</button>
+      </Modal>
     </div>
   );
 }

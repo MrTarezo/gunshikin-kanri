@@ -19,3 +19,14 @@ type Receipt @model @auth(rules: [{ allow: private }]) {
   imageKey: String!
   uploadedAt: AWSDateTime!
 }
+
+type Todo @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  title: String!
+  done: Boolean!
+  owner: String
+  dueDate: AWSDate
+  assignee: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}

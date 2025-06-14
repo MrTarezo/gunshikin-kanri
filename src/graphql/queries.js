@@ -81,3 +81,41 @@ export const listReceipts = /* GraphQL */ `
     }
   }
 `;
+export const getTodo = /* GraphQL */ `
+  query GetTodo($id: ID!) {
+    getTodo(id: $id) {
+      id
+      title
+      done
+      owner
+      dueDate
+      assignee
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listTodos = /* GraphQL */ `
+  query ListTodos(
+    $filter: ModelTodoFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listTodos(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        title
+        done
+        owner
+        dueDate
+        assignee
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
