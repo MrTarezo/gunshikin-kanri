@@ -91,6 +91,8 @@ export default function TodoList({ nickname }) {
           placeholder="やることを入力"
           style={{ flex: '1 1 200px', minWidth: '150px', padding: '0.5rem' }}
         />
+        <label style={{ fontSize: '0.8rem' }}>
+        期限：
         <input
           type="date"
           value={dueDate}
@@ -104,6 +106,7 @@ export default function TodoList({ nickname }) {
             borderRadius: '6px'
           }}
         />
+        </label>
         <select
           value={assignee}
           onChange={(e) => setAssignee(e.target.value)}
