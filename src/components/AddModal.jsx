@@ -164,8 +164,8 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
             required
           />
           <select value={type} onChange={handleTypeChange}>
-            <option value="expense">自腹</option>
-            <option value="income">収入</option>
+            <option value="expense">🧾 自腹</option>
+            <option value="income">💰 収入</option>
           </select>
           <select
             value={category}
@@ -174,13 +174,15 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
             disabled={type === 'income'}
           >
             <option value="">カテゴリを選択</option>
-            <option value="食費">食費</option>
-            <option value="日用品">日用品</option>
-            <option value="交通費">交通費</option>
-            <option value="娯楽">娯楽</option>
-            <option value="外食">外食</option>
-            <option value="収入">収入</option>
-            <option value="その他">その他</option>
+            <option value="食費">🍙 食費</option>
+            <option value="日用品">🧻 日用品</option>
+            <option value="交通費">🚖 交通費</option>
+            <option value="娯楽">🍿 娯楽</option>
+            <option value="外食">🍽️ 外食</option>
+            {/* <option value="収入">収入</option> */}
+            <option value="光熱費">💡 光熱費</option>
+            <option value="家賃">🏠 家賃</option>
+            <option value="その他">❓ その他</option>
           </select>
           <input
             type="file"
