@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import { generateClient } from 'aws-amplify/api';
 import { createExpense } from '../graphql/mutations';
 import { uploadData } from '@aws-amplify/storage';
+import { v4 as uuidv4 } from 'uuid'; // ← 追加
 
 const client = generateClient();
 
@@ -40,8 +41,9 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
 
       if (file) {
         const today = new Date().toISOString().split('T')[0];
-        const encodedFileName = encodeURIComponent(file.name);
-        const s3Key = `receipts/${today}_${encodedFileName}`;
+        const extension = file.name.split('.').pop(); // 拡張子維持
+        const uniqueId = uuidv4();
+        const s3Key = `receipts/${today}_${uniqueId}.${extension}`;
         const result = await uploadData({
           path: s3Key,
           data: file,
@@ -54,7 +56,6 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
         console.log('✅ 画像アップロード成功:', imageKey);
       }
 
-      // 安全策としてバックエンド送信時にも category を強制上書き
       const input = {
         title,
         amount: parseFloat(amount),
@@ -179,7 +180,6 @@ function AddModal({ isOpen, onRequestClose, nickname, onAdded }) {
             <option value="交通費">🚖 交通費</option>
             <option value="娯楽">🍿 娯楽</option>
             <option value="外食">🍽️ 外食</option>
-            {/* <option value="収入">収入</option> */}
             <option value="光熱費">💡 光熱費</option>
             <option value="家賃">🏠 家賃</option>
             <option value="その他">❓ その他</option>
