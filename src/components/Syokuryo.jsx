@@ -70,7 +70,10 @@ export default function Syokuryo() {
       const imgMap = {};
       items.forEach(item => {
         if (item.location && item.image) {
-          imgMap[item.location] = item.image;
+          imgMap[item.location] = {
+          preview: item.image.replace('_original.jpg', '_preview.jpg'),
+          original: item.image,
+          };
         }
       });
       setLocationImages(imgMap);
@@ -133,7 +136,21 @@ export default function Syokuryo() {
           },
         },
       });
-  
+      try {
+        const previewUrl = await getUrl({ path: `${basePath}_preview.jpg`, options: { accessLevel: 'protected' } });
+        const originalUrl = await getUrl({ path: `${basePath}_original.jpg`, options: { accessLevel: 'protected' } });
+      
+        setImageURLs(prev => ({
+          ...prev,
+          [selectedLocationForPhoto]: {
+            preview: previewUrl.url.href,
+            original: originalUrl.url.href,
+          },
+        }));
+      } catch (e) {
+        console.warn('プレビューURL取得失敗', e);
+      }
+      
       setSelectedLocationForPhoto('');
     } catch (error) {
       console.error('画像アップロード失敗:', error);
