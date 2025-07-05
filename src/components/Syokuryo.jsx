@@ -9,16 +9,16 @@ import imageCompression from 'browser-image-compression';
 const client = generateClient();
 
 const fridgeLocations = [
-  { id: 'fridge-top', name: '冷蔵室上段', icon: '🥛' },
-  { id: 'fridge-middle', name: '冷蔵室中段', icon: '🥗' },
-  { id: 'fridge-bottom', name: '冷蔵室下段', icon: '🍖' },
+  { id: 'fridge-top', name: '上段', icon: '🍮' },
+  { id: 'fridge-middle', name: '中段', icon: '🍖' },
+  { id: 'fridge-bottom', name: '下段', icon: '🥗' },
   { id: 'vegetable', name: '野菜室', icon: '🥕' },
-  { id: 'freezer-top', name: '冷凍庫上段', icon: '❄️' },
-  { id: 'freezer-middle', name: '冷凍庫中段', icon: '🧊' },
-  { id: 'freezer-bottom', name: '冷凍庫下段', icon: '🍦' },
+  { id: 'freezer-top', name: '上段', icon: '🍦' },
+  { id: 'freezer-middle', name: '中段', icon: '❄️' },
+  { id: 'freezer-bottom', name: '下段', icon: '🧊' },
 ];
 
-const doorPocket = { id: 'door-pocket', name: 'ドアポケット', icon: '🚪' };
+const doorPocket = { id: 'door-pocket', name: 'ドア面', icon: '🚪' };
 
 export default function Syokuryo() {
   const [urgentItems, setUrgentItems] = useState([]);
@@ -227,9 +227,9 @@ export default function Syokuryo() {
 
   return (
     <div style={{ padding: '1rem', maxWidth: Math.min(windowWidth - 32, 640), margin: '0 auto' }}>
-      <h2>⚠️ 食べないと危険なリスト</h2>
+      <h2>⚠️ スグ食べないと危険な食品リスト</h2>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-        <input value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="例：古いチーズ" style={{ flex: 1 }} />
+        <input value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="例：" style={{ flex: 1 }} />
         <button onClick={() => {
           const input = {
             name: newItemName.trim(),
@@ -257,7 +257,7 @@ export default function Syokuryo() {
         ))}
       </ul>
 
-      <h2 style={{ marginTop: '2rem' }}>🧊 冷蔵庫ビュー</h2>
+      <h2 style={{ marginTop: '2rem' }}>● 冷蔵庫ビュー</h2>
       <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem' }}>
         {/* 冷蔵室 */}
         <div style={{
@@ -274,12 +274,12 @@ export default function Syokuryo() {
         const loc = fridgeLocations.find(l => l.id === id);
         return (
           <div key={id}>
-            <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
-              {loc.icon} {loc.name}
-              {locationDataMap[loc.id]?.addedDate && (
-                <>（{locationDataMap[loc.id].addedDate}）</>
-              )}
+          <div style={{ fontWeight:'bold' }}>{loc.icon} {loc.name}</div>
+          {locationDataMap[loc.id]?.addedDate && (
+            <div style={{ fontSize:'0.8rem', color:'#666', marginBottom:4 }}>
+              {locationDataMap[loc.id].addedDate}
             </div>
+          )}
             {renderLocationImage(loc.id, loc.name)}
           </div>
         );
@@ -290,7 +290,7 @@ export default function Syokuryo() {
         {/* 冷蔵庫の間（スペーサー） */}
         <div style={{ width: 8, background: '#ddd' }} />
 
-        {/* ドアポケット */}
+        {/* ── ドアポケット ────────────────── */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -299,23 +299,50 @@ export default function Syokuryo() {
           border: '2px solid #aaa',
           borderRadius: 8,
           padding: '0.5rem',
-          background: '#fcfcfc'
+          background: '#fcfcfc',
         }}>
-          <div style={{ fontWeight: 'bold', marginBottom: 4 }}>{doorPocket.icon} {doorPocket.name}</div>
+          {/* タイトル */}
+          <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
+            {doorPocket.icon} {doorPocket.name}
+          </div>
+
+          {/* ★ 日付を 2 行目に追加 ★ */}
+          {locationDataMap[doorPocket.id]?.addedDate && (
+            <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: 4 }}>
+              {locationDataMap[doorPocket.id].addedDate}
+            </div>
+          )}
+
           {renderLocationImage(doorPocket.id, doorPocket.name, 'door')}
         </div>
+
+
+
       </div>
 
       <hr style={{ marginTop: '2rem', marginBottom: '1rem', border: 'none', borderTop: '2px dashed #ccc' }} />
-      <h3 style={{ marginTop: '2rem' }}>❄️ 冷凍庫</h3>
-      {fridgeLocations.filter(l => l.id.startsWith('freezer')).map(loc => (
-        <div key={loc.id} style={{ marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>{loc.icon} {loc.name}</span>
+      <h3 style={{ marginTop: '2rem' }}>● 冷凍庫ビュー</h3>
+
+      {fridgeLocations
+        .filter(l => l.id.startsWith('freezer'))
+        .map(loc => (
+          <div key={loc.id} style={{ marginBottom: '1rem' }}>
+            {/* タイトル */}
+            <div style={{ fontWeight: 'bold' }}>
+              {loc.icon} {loc.name}
+            </div>
+
+            {/* ★ 日付を 2 行目に追加 ★ */}
+            {locationDataMap[loc.id]?.addedDate && (
+              <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: 4 }}>
+                {locationDataMap[loc.id].addedDate}
+              </div>
+            )}
+
+            {renderLocationImage(loc.id, loc.name, true)}
           </div>
-          {renderLocationImage(loc.id, loc.name, true)}
-        </div>
       ))}
+
 
       <input type="file" ref={fileInputRef} onChange={onFileChange} accept="image/*" capture="environment" style={{ display: 'none' }} />
 
