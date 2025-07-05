@@ -177,14 +177,13 @@ export default function Syokuryo() {
       }
   
       setSelectedLocationForPhoto('');
+      await fetchFridgeItems(); 
     } catch (error) {
       console.error('画像アップロード失敗:', error);
       alert('登録エラー: ' + (error.errors?.[0]?.message || ''));
     }
   };
   
-    
-
   const onFileChange = e => {
     const file = e.target.files?.[0];
     handleImageCapture(file);
