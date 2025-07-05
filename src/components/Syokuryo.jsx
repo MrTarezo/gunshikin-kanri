@@ -127,19 +127,28 @@ export default function Syokuryo() {
 
   const renderLocationImage = (locId, locName, tall = true) => {
     const src = imageURLs[locId];
+  
     if (src) {
       return (
         <div style={{ position: 'relative', cursor: 'pointer' }}>
           <img
             src={src}
             alt={locName}
-            onClick={() => setEnlargedImage({ src, name: locName })}
-            style={{ width: '100%', height: tall ? 180 : 100, objectFit: 'cover', borderRadius: 4 }}
+            onDoubleClick={() => {
+              setSelectedLocationForPhoto(locId);
+              fileInputRef.current?.click();
+            }}
+            style={{
+              width: '100%',
+              height: tall ? 180 : 100,
+              objectFit: 'cover',
+              borderRadius: 4,
+            }}
           />
         </div>
       );
     }
-
+  
     return (
       <div
         onClick={() => {
@@ -163,6 +172,7 @@ export default function Syokuryo() {
       </div>
     );
   };
+  
 
   return (
     <div style={{ padding: '1rem', maxWidth: 480, margin: '0 auto' }}>
@@ -203,9 +213,6 @@ export default function Syokuryo() {
             <div key={loc.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>{loc.icon} {loc.name}</span>
-                <button onClick={() => { setSelectedLocationForPhoto(loc.id); fileInputRef.current?.click(); }}>
-                  <Camera size={16} />
-                </button>
               </div>
               {renderLocationImage(loc.id, loc.name, true)}
             </div>
