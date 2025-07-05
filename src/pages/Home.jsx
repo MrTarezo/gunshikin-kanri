@@ -10,7 +10,7 @@ import MonthlyChart from '../components/MonthlyChart';
 import CategoryPieChart from '../components/CategoryPieChart';
 import ExpenseCalendar from '../components/ExpenseCalendar';
 import TodoList from '../components/TodoList';
-import FridgeInventory from '../components/Syokuryo'; // 👈 追加
+import Syokuryo from '../components/Syokuryo'; // 👈 更新
 import Modal from 'react-modal';
 
 const client = generateClient();
@@ -30,7 +30,7 @@ export default function Home({ nickname }) {
   const [showPieChart, setShowPieChart] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showTodo, setShowTodo] = useState(false);
-  const [showFridge, setShowFridge] = useState(false); // 👈 追加
+  const [showFridge, setShowFridge] = useState(false);
 
   useEffect(() => {
     fetchExpenses();
@@ -121,13 +121,13 @@ export default function Home({ nickname }) {
 
   return (
     <div>
-      {/* ボタン類 */}
+      {/* ボタン類 - 1段目 */}
       <div style={{
         display: 'flex',
         justifyContent: 'center',
         gap: '0.2rem',
         flexWrap: 'wrap',
-        marginBottom: '1rem',
+        marginBottom: '0.5rem',
       }}>
         <button onClick={() => setAddModalOpen(true)}> ➕ </button>
         <button onClick={() => {
@@ -146,6 +146,16 @@ export default function Home({ nickname }) {
         }}>
           {showCalendar ? '◀' : '📅暦'}
         </button>
+      </div>
+
+      {/* ボタン類 - 2段目 */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '0.2rem',
+        flexWrap: 'wrap',
+        marginBottom: '1rem',
+      }}>
         <button onClick={() => {
           setShowTodo(prev => !prev);
           setShowPieChart(false);
@@ -210,7 +220,7 @@ export default function Home({ nickname }) {
       ) : showTodo ? (
         <TodoList nickname={nickname} />
       ) : showFridge ? (
-        <FridgeInventory />
+        <Syokuryo />
       ) : (
         <>
           <ExpenseTable
