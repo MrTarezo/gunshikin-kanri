@@ -65,8 +65,11 @@ export default function Syokuryo() {
   const handleImageCapture = async file => {
     if (!file || !selectedLocationForPhoto) return;
     try {
+      // ファイル名を安全に変換
       const safeName = file.name.replace(/\s/g, '_').replace(/[^\w.-]/g, '');
       const filename = `fridge/${selectedLocationForPhoto}_${Date.now()}_${safeName}`;
+  
+      // S3 にアップロード
       const result = await uploadData({
         path: filename,
         data: file,
@@ -76,12 +79,34 @@ export default function Syokuryo() {
         },
       });
       const key = result?.path ?? filename;
-      console.log('画像アップロード完了:', key);
+      console.log('✅ アップロード完了:', key);
+  
+      // ステートに反映（即時表示用）
       setLocationImages(prev => ({ ...prev, [selectedLocationForPhoto]: key }));
+  
+      // GraphQL に保存（永続化用）
+      await client.graphql({
+        query: createFridgeItem,
+        variables: {
+          input: {
+            name: '写真のみ',
+            location: selectedLocationForPhoto,
+            image: key,
+            isUrgent: false,
+            addedDate: new Date().toISOString().split('T')[0], // ← これを追加
+          }
+        }
+      });
+  
       setSelectedLocationForPhoto('');
     } catch (error) {
       console.error('画像アップロード失敗:', error);
-      alert('画像のアップロードに失敗しました');
+      if (error.errors) {
+        console.error('GraphQLエラー詳細:', JSON.stringify(error.errors, null, 2));
+        alert('登録エラー: ' + error.errors[0]?.message);
+      } else {
+        alert('不明なエラーで登録に失敗しました');
+      }
     }
   };
   
