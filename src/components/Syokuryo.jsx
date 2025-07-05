@@ -38,17 +38,22 @@ export default function Syokuryo() {
     (async () => {
       const urls = {};
       for (const loc of [...fridgeLocations, doorPocket]) {
-        const key = locationImages[loc.id];
-        if (key) {
+        const keyObj = locationImages[loc.id];
+        if (keyObj?.preview) {
           try {
-            const { url } = await getUrl({ path: key, options: { accessLevel: 'protected' } });
-            urls[loc.id] = url.href;
+            const { url: previewUrl } = await getUrl({ path: keyObj.preview, options: { accessLevel: 'protected' } });
+            const { url: originalUrl } = await getUrl({ path: keyObj.original, options: { accessLevel: 'protected' } });
+            urls[loc.id] = {
+              preview: previewUrl.href,
+              original: originalUrl.href,
+            };
           } catch (e) {
             console.warn(`画像取得失敗: ${loc.id}`, e);
           }
         }
       }
       setImageURLs(urls);
+      
     })();
   }, [locationImages]);
 
@@ -78,19 +83,17 @@ export default function Syokuryo() {
   const handleImageCapture = async (file) => {
     if (!file || !selectedLocationForPhoto) return;
   
-    const filename = `fridge/${selectedLocationForPhoto}.jpg`;
-  
+    const basePath = `fridge/${selectedLocationForPhoto}`;
     try {
-      // ✅ 圧縮オプション
+      // 1️⃣ 圧縮バージョン
       const compressed = await imageCompression(file, {
-        maxSizeMB: 0.2,               // 最大 200KB まで
-        maxWidthOrHeight: 800,       // 最大辺800px（スマホには十分）
-        useWebWorker: true,          // 非同期処理でUIブロック回避
+        maxSizeMB: 0.2,
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
       });
   
-      // ✅ アップロードは圧縮後データを使う
-      const result = await uploadData({
-        path: filename,
+      await uploadData({
+        path: `${basePath}_preview.jpg`,
         data: compressed,
         options: {
           accessLevel: 'protected',
@@ -98,24 +101,37 @@ export default function Syokuryo() {
         },
       });
   
-      console.log('✅ 上書きアップロード完了:', result.path);
+      // 2️⃣ オリジナルもそのままアップ
+      await uploadData({
+        path: `${basePath}_original.jpg`,
+        data: file,
+        options: {
+          accessLevel: 'protected',
+          contentType: file.type,
+        },
+      });
   
+      // 状態更新
       setLocationImages(prev => ({
         ...prev,
-        [selectedLocationForPhoto]: filename,
+        [selectedLocationForPhoto]: {
+          preview: `${basePath}_preview.jpg`,
+          original: `${basePath}_original.jpg`,
+        },
       }));
   
+      // GraphQL登録（元画像パスを保存）
       await client.graphql({
         query: createFridgeItem,
         variables: {
           input: {
             name: '写真のみ',
             location: selectedLocationForPhoto,
-            image: filename,
+            image: `${basePath}_original.jpg`, // ← モデルは元画像基準で
             isUrgent: false,
             addedDate: new Date().toISOString().split('T')[0],
-          }
-        }
+          },
+        },
       });
   
       setSelectedLocationForPhoto('');
@@ -124,7 +140,7 @@ export default function Syokuryo() {
       alert('登録エラー: ' + (error.errors?.[0]?.message || ''));
     }
   };
-  
+    
 
   const onFileChange = e => {
     const file = e.target.files?.[0];
@@ -132,16 +148,17 @@ export default function Syokuryo() {
   };
 
   const renderLocationImage = (locId, locName, type = 'normal') => {
-    const src = imageURLs[locId];
-  
-    const height = type === 'door' ? 300 : 180;     // ← 縦長表示！
-    const minHeight = type === 'door' ? 250 : 100;  // ← プレースホルダも対応
-  
-    if (src) {
+    const srcObj = imageURLs[locId];
+    const previewSrc = srcObj?.preview;
+    const originalSrc = srcObj?.original;
+    const height = type === 'door' ? 300 : 180;
+    const minHeight = type === 'door' ? 250 : 100;
+    
+    if (previewSrc) {
       return (
         <div style={{ position: 'relative', cursor: 'pointer' }}>
           <img
-            src={src}
+            src={previewSrc}
             alt={locName}
             onClick={() => {
               // 📸 タップでカメラ起動（再撮影）
@@ -155,11 +172,10 @@ export default function Syokuryo() {
               borderRadius: 4,
             }}
           />
-          {/* 🔍 拡大表示ボタン */}
           <button
             onClick={(e) => {
-              e.stopPropagation(); // カメラ起動とバッティング防止
-              setEnlargedImage({ src, name: locName });
+              e.stopPropagation(); // バッティング防止
+              setEnlargedImage({ src: originalSrc, name: locName }); // ✅ ← 高画質元画像を拡大表示
             }}
             style={{
               position: 'absolute',
@@ -177,6 +193,7 @@ export default function Syokuryo() {
         </div>
       );
     }
+    
     
     
   
