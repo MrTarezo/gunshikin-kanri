@@ -9,10 +9,8 @@ import imageCompression from 'browser-image-compression';
 const client = generateClient();
 
 const fridgeLocations = [
-  { id: 'fridge-top', name: '上段', icon: '🍮' },
-  { id: 'fridge-middle', name: '中段', icon: '🍖' },
-  { id: 'fridge-bottom', name: '下段', icon: '🥗' },
-  { id: 'vegetable', name: '野菜室', icon: '🥕' },
+  { id: 'fridge-main', name: '冷蔵室', icon: '🍖' },
+  { id: 'vegetable', name: '野菜室', icon: '🥗' },
   { id: 'freezer-top', name: '上段', icon: '🍦' },
   { id: 'freezer-middle', name: '中段', icon: '❄️' },
   { id: 'freezer-bottom', name: '下段', icon: '🧊' },
@@ -178,25 +176,23 @@ export default function Syokuryo() {
     const srcObj = imageURLs[locId];
     const previewSrc = srcObj?.preview;
     const originalSrc = srcObj?.original;
-    const height = type === 'door' ? 300 : 180;
-    const minHeight = type === 'door' ? 250 : 100;
+    const height = type === 'door' ? 350 : 220;
+    const minHeight = type === 'door' ? 300 : 150;
 
     if (previewSrc) {
       return (
-        <div style={{ position: 'relative', cursor: 'pointer' }}>
+        <div style={{ position: 'relative' }}>
           <img
             src={previewSrc}
             alt={locName}
-            onClick={() => {
-              setSelectedLocationForPhoto(locId);
-              fileInputRef.current?.click();
-            }}
-            style={{ width: '100%', height, objectFit: 'cover', borderRadius: 4 }}
+            onClick={() => setEnlargedImage({ src: originalSrc, name: locName })}
+            style={{ width: '100%', height, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }}
           />
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setEnlargedImage({ src: originalSrc, name: locName });
+              setSelectedLocationForPhoto(locId);
+              fileInputRef.current?.click();
             }}
             style={{
               position: 'absolute', top: 4, right: 4,
@@ -205,7 +201,7 @@ export default function Syokuryo() {
               padding: '0.3rem', cursor: 'pointer',
             }}
           >
-            <Image size={16} />
+            <Camera size={16} />
           </button>
         </div>
       );
@@ -226,8 +222,8 @@ export default function Syokuryo() {
   };
 
   return (
-    <div style={{ padding: '1rem', maxWidth: Math.min(windowWidth - 32, 640), margin: '0 auto' }}>
-      <h2>⚠️ スグ食べないと危険な食品リスト</h2>
+    <div style={{ padding: '0.5rem', maxWidth: Math.min(windowWidth - 16, 800), margin: '0 auto' }}>
+      <h2 style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>⚠️ スグ食べないと危険な食品リスト</h2>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
         <input value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="例：" style={{ flex: 1 }} />
         <button onClick={() => {
@@ -257,20 +253,22 @@ export default function Syokuryo() {
         ))}
       </ul>
 
-      <h2 style={{ marginTop: '2rem' }}>● 冷蔵庫ビュー</h2>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem' }}>
+      <h2 style={{ marginTop: '1.5rem', fontSize: '1.3rem', margin: '1rem 0 0.5rem 0', textAlign: 'center', background: '#e3f2fd', padding: '0.5rem', borderRadius: '8px', color: '#1976d2' }}> 冷蔵庫ビュー </h2>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.25rem', padding: '0' }}>
         {/* 冷蔵室 */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '1rem',
-          width: 220,
-          border: '2px solid #ccc',
-          borderRadius: 8,
+          gap: '0.5rem',
+          flex: 1,
+          maxWidth: 300,
+          border: '3px solid #90caf9',
+          borderRadius: 12,
           padding: '0.5rem',
-          background: '#f9f9f9'
+          background: 'linear-gradient(to bottom, #f5f5f5 0%, #e3f2fd 100%)',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
         }}>
-      {['fridge-top', 'fridge-middle', 'fridge-bottom', 'vegetable'].map(id => {
+      {['fridge-main', 'vegetable'].map(id => {
         const loc = fridgeLocations.find(l => l.id === id);
         return (
           <div key={id}>
@@ -288,18 +286,19 @@ export default function Syokuryo() {
         </div>
 
         {/* 冷蔵庫の間（スペーサー） */}
-        <div style={{ width: 8, background: '#ddd' }} />
+        <div style={{ width: 4, background: 'linear-gradient(to right, #666, #999, #666)', borderRadius: '2px' }} />
 
         {/* ── ドアポケット ────────────────── */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          width: 100,
-          border: '2px solid #aaa',
-          borderRadius: 8,
+          width: 120,
+          border: '3px solid #64b5f6',
+          borderRadius: 12,
           padding: '0.5rem',
-          background: '#fcfcfc',
+          background: 'linear-gradient(to bottom, #fafafa 0%, #e1f5fe 100%)',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
         }}>
           {/* タイトル */}
           <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
@@ -321,12 +320,19 @@ export default function Syokuryo() {
       </div>
 
       <hr style={{ marginTop: '2rem', marginBottom: '1rem', border: 'none', borderTop: '2px dashed #ccc' }} />
-      <h3 style={{ marginTop: '2rem' }}>● 冷凍庫ビュー</h3>
+      <h3 style={{ marginTop: '2rem', fontSize: '1.3rem', margin: '1rem 0 0.5rem 0', textAlign: 'center', background: '#bbdefb', padding: '0.5rem', borderRadius: '8px', color: '#0d47a1' }}>🧊 冷凍庫ビュー 🧊</h3>
 
       {fridgeLocations
         .filter(l => l.id.startsWith('freezer'))
         .map(loc => (
-          <div key={loc.id} style={{ marginBottom: '1rem' }}>
+          <div key={loc.id} style={{ 
+            marginBottom: '1rem',
+            border: '3px solid #90caf9',
+            borderRadius: 12,
+            padding: '0.5rem',
+            background: 'linear-gradient(to bottom, #e8f5e9 0%, #c5e1a5 100%)',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
+          }}>
             {/* タイトル */}
             <div style={{ fontWeight: 'bold' }}>
               {loc.icon} {loc.name}
