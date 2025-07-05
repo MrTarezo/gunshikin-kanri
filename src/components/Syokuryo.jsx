@@ -6,8 +6,6 @@ import { listFridgeItems } from '../graphql/queries';
 import { createFridgeItem, deleteFridgeItem } from '../graphql/mutations';
 import imageCompression from 'browser-image-compression';
 
-
-
 const client = generateClient();
 
 const fridgeLocations = [
@@ -30,9 +28,15 @@ export default function Syokuryo() {
   const [selectedLocationForPhoto, setSelectedLocationForPhoto] = useState('');
   const [enlargedImage, setEnlargedImage] = useState(null);
   const fileInputRef = useRef(null);
-  const [fridgeItems, setFridgeItems] = useState([]); 
+  const [fridgeItems, setFridgeItems] = useState([]);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  useEffect(() => { fetchFridgeItems(); }, []);
+  useEffect(() => {
+    fetchFridgeItems();
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -53,7 +57,6 @@ export default function Syokuryo() {
         }
       }
       setImageURLs(urls);
-      
     })();
   }, [locationImages]);
 
@@ -62,18 +65,16 @@ export default function Syokuryo() {
       const res = await client.graphql({ query: listFridgeItems });
       const items = res.data.listFridgeItems.items;
       setFridgeItems(items);
-  
-      // ⚠️ isUrgent=trueのものだけ urgentItems に
+
       const urgents = items.filter(item => item.isUrgent);
       setUrgentItems(urgents);
-  
-      // ✅ location と image があるすべてのレコードを imageMap に登録
+
       const imgMap = {};
       items.forEach(item => {
         if (item.location && item.image) {
           imgMap[item.location] = {
-          preview: item.image.replace('_original.jpg', '_preview.jpg'),
-          original: item.image,
+            preview: item.image.replace('_original.jpg', '_preview.jpg'),
+            original: item.image,
           };
         }
       });
@@ -87,20 +88,18 @@ export default function Syokuryo() {
   fridgeItems.forEach(item => {
     locationDataMap[item.location] = item;
   });
-  
+
   const handleImageCapture = async (file) => {
     if (!file || !selectedLocationForPhoto) return;
-  
+
     const basePath = `fridge/${selectedLocationForPhoto}`;
     try {
-      // 1️⃣ 圧縮プレビュー生成
       const compressed = await imageCompression(file, {
         maxSizeMB: 0.2,
         maxWidthOrHeight: 800,
         useWebWorker: true,
       });
-  
-      // 2️⃣ S3アップロード（プレビュー + オリジナル）
+
       await uploadData({
         path: `${basePath}_preview.jpg`,
         data: compressed,
@@ -109,7 +108,7 @@ export default function Syokuryo() {
           contentType: compressed.type,
         },
       });
-  
+
       await uploadData({
         path: `${basePath}_original.jpg`,
         data: file,
@@ -118,13 +117,10 @@ export default function Syokuryo() {
           contentType: file.type,
         },
       });
-  
-      // 3️⃣ DynamoDBに create or update
+
       const listRes = await client.graphql({ query: listFridgeItems });
-      const existingItem = listRes.data.listFridgeItems.items.find(
-        (item) => item.location === selectedLocationForPhoto
-      );
-  
+      const existingItem = listRes.data.listFridgeItems.items.find(item => item.location === selectedLocationForPhoto);
+
       const input = {
         name: '写真のみ',
         location: selectedLocationForPhoto,
@@ -132,31 +128,20 @@ export default function Syokuryo() {
         isUrgent: false,
         addedDate: new Date().toISOString().split('T')[0],
       };
-  
+
       if (existingItem) {
-        // update
         await client.graphql({
           query: updateFridgeItem,
-          variables: {
-            input: {
-              id: existingItem.id,
-              ...input,
-            },
-          },
+          variables: { input: { id: existingItem.id, ...input } },
         });
       } else {
-        // create
-        await client.graphql({
-          query: createFridgeItem,
-          variables: { input },
-        });
+        await client.graphql({ query: createFridgeItem, variables: { input } });
       }
-  
-      // 4️⃣ 表示用URL取得して反映
+
       try {
         const previewUrl = await getUrl({ path: `${basePath}_preview.jpg`, options: { accessLevel: 'protected' } });
         const originalUrl = await getUrl({ path: `${basePath}_original.jpg`, options: { accessLevel: 'protected' } });
-  
+
         setLocationImages(prev => ({
           ...prev,
           [selectedLocationForPhoto]: {
@@ -164,7 +149,7 @@ export default function Syokuryo() {
             original: `${basePath}_original.jpg`,
           },
         }));
-  
+
         setImageURLs(prev => ({
           ...prev,
           [selectedLocationForPhoto]: {
@@ -175,15 +160,15 @@ export default function Syokuryo() {
       } catch (e) {
         console.warn('プレビューURL取得失敗', e);
       }
-  
+
       setSelectedLocationForPhoto('');
-      await fetchFridgeItems(); 
+      await fetchFridgeItems();
     } catch (error) {
       console.error('画像アップロード失敗:', error);
       alert('登録エラー: ' + (error.errors?.[0]?.message || ''));
     }
   };
-  
+
   const onFileChange = e => {
     const file = e.target.files?.[0];
     handleImageCapture(file);
@@ -195,7 +180,7 @@ export default function Syokuryo() {
     const originalSrc = srcObj?.original;
     const height = type === 'door' ? 300 : 180;
     const minHeight = type === 'door' ? 250 : 100;
-    
+
     if (previewSrc) {
       return (
         <div style={{ position: 'relative', cursor: 'pointer' }}>
@@ -203,31 +188,21 @@ export default function Syokuryo() {
             src={previewSrc}
             alt={locName}
             onClick={() => {
-              // 📸 タップでカメラ起動（再撮影）
               setSelectedLocationForPhoto(locId);
               fileInputRef.current?.click();
             }}
-            style={{
-              width: '100%',
-              height,
-              objectFit: 'cover',
-              borderRadius: 4,
-            }}
+            style={{ width: '100%', height, objectFit: 'cover', borderRadius: 4 }}
           />
           <button
             onClick={(e) => {
-              e.stopPropagation(); // バッティング防止
-              setEnlargedImage({ src: originalSrc, name: locName }); // ✅ ← 高画質元画像を拡大表示
+              e.stopPropagation();
+              setEnlargedImage({ src: originalSrc, name: locName });
             }}
             style={{
-              position: 'absolute',
-              top: 4,
-              right: 4,
+              position: 'absolute', top: 4, right: 4,
               background: 'rgba(255,255,255,0.7)',
-              border: 'none',
-              borderRadius: '50%',
-              padding: '0.3rem',
-              cursor: 'pointer',
+              border: 'none', borderRadius: '50%',
+              padding: '0.3rem', cursor: 'pointer',
             }}
           >
             <Image size={16} />
@@ -235,36 +210,23 @@ export default function Syokuryo() {
         </div>
       );
     }
-    
+
     return (
       <div
         onClick={() => {
           setSelectedLocationForPhoto(locId);
           fileInputRef.current?.click();
         }}
-        style={{
-          height,
-          minHeight,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#f0f0f0',
-          borderRadius: 4,
-          border: '1px dashed #ccc',
-          cursor: 'pointer',
-        }}
+        style={{ height, minHeight, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0', borderRadius: 4, border: '1px dashed #ccc', cursor: 'pointer' }}
       >
         <Camera size={24} />
         <div style={{ fontSize: '0.8rem', marginTop: 4 }}>写真なし</div>
       </div>
     );
   };
-  
-  
 
   return (
-    <div style={{ padding: '1rem', maxWidth: 480, margin: '0 auto' }}>
+    <div style={{ padding: '1rem', maxWidth: Math.min(windowWidth - 32, 640), margin: '0 auto' }}>
       <h2>⚠️ 食べないと危険なリスト</h2>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
         <input value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="例：古いチーズ" style={{ flex: 1 }} />
@@ -296,34 +258,51 @@ export default function Syokuryo() {
       </ul>
 
       <h2 style={{ marginTop: '2rem' }}>🧊 冷蔵庫ビュー</h2>
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {fridgeLocations.filter(l => ['fridge-top', 'fridge-middle', 'fridge-bottom', 'vegetable'].includes(l.id)).map(loc => (
-            <div key={loc.id}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>
-            {loc.icon} {loc.name}
-            {locationDataMap[loc.id]?.addedDate && (
-              <>（{locationDataMap[loc.id].addedDate}）</>
-            )}
-          </span>
-
-
-
-
-
-
-
-              </div>
-              {renderLocationImage(loc.id, loc.name, true)}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem' }}>
+        {/* 冷蔵室 */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          width: 220,
+          border: '2px solid #ccc',
+          borderRadius: 8,
+          padding: '0.5rem',
+          background: '#f9f9f9'
+        }}>
+      {['fridge-top', 'fridge-middle', 'fridge-bottom', 'vegetable'].map(id => {
+        const loc = fridgeLocations.find(l => l.id === id);
+        return (
+          <div key={id}>
+            <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
+              {loc.icon} {loc.name}
+              {locationDataMap[loc.id]?.addedDate && (
+                <>（{locationDataMap[loc.id].addedDate}）</>
+              )}
             </div>
-          ))}
-        </div>
-        <div style={{ width: 160, alignSelf: 'flex-start' }}>
-          <div style={{ textAlign: 'center', marginBottom: 4 }}>
-            {doorPocket.icon} {doorPocket.name}
+            {renderLocationImage(loc.id, loc.name)}
           </div>
-          {renderLocationImage(doorPocket.id, doorPocket.name, true)}
+        );
+      })}
+
+        </div>
+
+        {/* 冷蔵庫の間（スペーサー） */}
+        <div style={{ width: 8, background: '#ddd' }} />
+
+        {/* ドアポケット */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: 100,
+          border: '2px solid #aaa',
+          borderRadius: 8,
+          padding: '0.5rem',
+          background: '#fcfcfc'
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: 4 }}>{doorPocket.icon} {doorPocket.name}</div>
+          {renderLocationImage(doorPocket.id, doorPocket.name, 'door')}
         </div>
       </div>
 
