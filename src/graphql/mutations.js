@@ -169,3 +169,57 @@ export const deleteTodo = /* GraphQL */ `
     }
   }
 `;
+export const createFridgeItem = /* GraphQL */ `
+  mutation CreateFridgeItem(
+    $input: CreateFridgeItemInput!
+    $condition: ModelFridgeItemConditionInput
+  ) {
+    createFridgeItem(input: $input, condition: $condition) {
+      id
+      name
+      addedDate
+      location
+      isUrgent
+      image
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateFridgeItem = /* GraphQL */ `
+  mutation UpdateFridgeItem(
+    $input: UpdateFridgeItemInput!
+    $condition: ModelFridgeItemConditionInput
+  ) {
+    updateFridgeItem(input: $input, condition: $condition) {
+      id
+      name
+      addedDate
+      location
+      isUrgent
+      image
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteFridgeItem = /* GraphQL */ `
+  mutation DeleteFridgeItem(
+    $input: DeleteFridgeItemInput!
+    $condition: ModelFridgeItemConditionInput
+  ) {
+    deleteFridgeItem(input: $input, condition: $condition) {
+      id
+      name
+      addedDate
+      location
+      isUrgent
+      image
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;

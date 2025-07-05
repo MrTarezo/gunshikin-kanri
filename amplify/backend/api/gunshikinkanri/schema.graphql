@@ -30,3 +30,12 @@ type Todo @model @auth(rules: [{ allow: private }]) {
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
+
+type FridgeItem @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  name: String!
+  addedDate: AWSDate!
+  location: String
+  isUrgent: Boolean
+  image: String
+}

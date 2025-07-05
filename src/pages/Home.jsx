@@ -10,7 +10,7 @@ import MonthlyChart from '../components/MonthlyChart';
 import CategoryPieChart from '../components/CategoryPieChart';
 import ExpenseCalendar from '../components/ExpenseCalendar';
 import TodoList from '../components/TodoList';
-import Syokuryo from '../components/Syokuryo'; // 👈 更新
+import Syokuryo from '../components/Syokuryo'; 
 import Modal from 'react-modal';
 
 const client = generateClient();
@@ -129,7 +129,7 @@ export default function Home({ nickname }) {
         flexWrap: 'wrap',
         marginBottom: '0.5rem',
       }}>
-        <button onClick={() => setAddModalOpen(true)}> ➕ </button>
+        <button onClick={() => setAddModalOpen(true)}> ➕新規登録 </button>
         <button onClick={() => {
           setShowPieChart(prev => !prev);
           setShowCalendar(false);

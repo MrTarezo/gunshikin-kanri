@@ -119,3 +119,41 @@ export const listTodos = /* GraphQL */ `
     }
   }
 `;
+export const getFridgeItem = /* GraphQL */ `
+  query GetFridgeItem($id: ID!) {
+    getFridgeItem(id: $id) {
+      id
+      name
+      addedDate
+      location
+      isUrgent
+      image
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listFridgeItems = /* GraphQL */ `
+  query ListFridgeItems(
+    $filter: ModelFridgeItemFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listFridgeItems(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        addedDate
+        location
+        isUrgent
+        image
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;

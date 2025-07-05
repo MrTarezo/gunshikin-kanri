@@ -142,3 +142,54 @@ export const onDeleteTodo = /* GraphQL */ `
     }
   }
 `;
+export const onCreateFridgeItem = /* GraphQL */ `
+  subscription OnCreateFridgeItem(
+    $filter: ModelSubscriptionFridgeItemFilterInput
+  ) {
+    onCreateFridgeItem(filter: $filter) {
+      id
+      name
+      addedDate
+      location
+      isUrgent
+      image
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateFridgeItem = /* GraphQL */ `
+  subscription OnUpdateFridgeItem(
+    $filter: ModelSubscriptionFridgeItemFilterInput
+  ) {
+    onUpdateFridgeItem(filter: $filter) {
+      id
+      name
+      addedDate
+      location
+      isUrgent
+      image
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteFridgeItem = /* GraphQL */ `
+  subscription OnDeleteFridgeItem(
+    $filter: ModelSubscriptionFridgeItemFilterInput
+  ) {
+    onDeleteFridgeItem(filter: $filter) {
+      id
+      name
+      addedDate
+      location
+      isUrgent
+      image
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
