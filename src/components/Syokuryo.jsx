@@ -1,4 +1,3 @@
-// Syokuryo.jsx 冷蔵庫断面レイアウト + モバイル対応
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Image, X, Trash2 } from 'lucide-react';
 import { generateClient } from 'aws-amplify/api';
@@ -63,36 +62,6 @@ export default function Syokuryo() {
     }
   };
 
-  const handleAddUrgentItem = async () => {
-    if (!newItemName.trim()) return;
-    try {
-      const input = {
-        name: newItemName.trim(),
-        addedDate: new Date().toISOString().split('T')[0],
-        isUrgent: true,
-        location: '',
-        image: '',
-      };
-      const res = await client.graphql({ query: createFridgeItem, variables: { input } });
-      setUrgentItems(prev => [...prev, res.data.createFridgeItem]);
-      setNewItemName('');
-    } catch (err) {
-      console.error('追加失敗:', err);
-      alert('登録に失敗しました');
-    }
-  };
-
-  const handleDeleteUrgentItem = async id => {
-    if (!confirm('削除しますか？')) return;
-    try {
-      await client.graphql({ query: deleteFridgeItem, variables: { input: { id } } });
-      setUrgentItems(prev => prev.filter(item => item.id !== id));
-    } catch (err) {
-      console.error('削除失敗:', err);
-      alert('削除に失敗しました');
-    }
-  };
-
   const handleImageCapture = async file => {
     if (!file || !selectedLocationForPhoto) return;
     try {
@@ -152,7 +121,6 @@ export default function Syokuryo() {
       );
     }
 
-    // 写真未登録時：中央カメラボタン
     return (
       <div
         onClick={() => {
@@ -178,8 +146,32 @@ export default function Syokuryo() {
     );
   };
 
+  const handleAddUrgentItem = async () => {
+    if (!newItemName.trim()) return;
+    try {
+      const input = {
+        name: newItemName.trim(),
+        addedDate: new Date().toISOString().split('T')[0],
+        isUrgent: true,
+        location: '',
+        image: '',
+      };
+      const res = await client.graphql({
+        query: createFridgeItem,
+        variables: { input },
+      });
+      setUrgentItems(prev => [...prev, res.data.createFridgeItem]);
+      setNewItemName('');
+    } catch (err) {
+      console.error('追加失敗:', err);
+      alert('登録に失敗しました');
+    }
+  };
+  
+
+
   return (
-    <div style={{ padding: '1rem', maxWidth: 480, margin: '0 auto' }}>
+    <div style={{ padding: '1rem', maxWidth: 480, margin: '0 auto', background: '#fff', borderRadius: 12, boxShadow: '0 0 8px rgba(0,0,0,0.1)' }}>
       <h2>⚠️ 食べないと危険なリスト</h2>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
         <input value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="例：賞味期限切れチーズ" style={{ flex: 1 }} />
@@ -196,7 +188,7 @@ export default function Syokuryo() {
 
       <h2 style={{ marginTop: '2rem' }}>🧊 冷蔵庫ビュー</h2>
 
-      {/* 冷蔵室＋ドアポケット */}
+      {/* 冷蔵室とドアポケット */}
       <div style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -204,7 +196,7 @@ export default function Syokuryo() {
         justifyContent: 'center',
         alignItems: 'stretch',
       }}>
-        {/* 冷蔵室3段 */}
+        {/* 冷蔵室 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, minWidth: 250 }}>
           {fridgeLocations.filter(l => l.id.includes('fridge')).map(loc => (
             <div key={loc.id} style={{ border: '1px solid #ccc', borderRadius: 8, padding: '0.5rem', background: '#fff' }}>
@@ -226,7 +218,8 @@ export default function Syokuryo() {
           border: '2px dashed #888',
           borderRadius: 8,
           padding: '0.5rem',
-          background: '#f9f9f9',
+          background: '#f4f4f4',
+          boxShadow: 'inset -2px 0 4px rgba(0,0,0,0.05)',
         }}>
           <h3 style={{ textAlign: 'center' }}>{doorPocket.icon} ドアポケット</h3>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -236,13 +229,12 @@ export default function Syokuryo() {
         </div>
       </div>
 
-      {/* 仕切り線 */}
       <hr style={{ borderTop: '1px dashed #aaa', margin: '2rem 0' }} />
 
       {/* 冷凍庫 */}
       <div style={{ marginTop: '2rem' }}>
         {fridgeLocations.filter(l => l.id.includes('freezer')).map(loc => (
-          <div key={loc.id} style={{ border: '1px solid #ccc', borderRadius: 8, padding: '0.5rem', marginBottom: '1rem' }}>
+          <div key={loc.id} style={{ border: '1px solid #ccc', borderRadius: 8, padding: '0.5rem', marginBottom: '1rem', backgroundColor: '#eef6ff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>{loc.icon} {loc.name}</span>
               <button onClick={() => { setSelectedLocationForPhoto(loc.id); fileInputRef.current?.click(); }}><Camera size={16} /></button>
@@ -256,10 +248,23 @@ export default function Syokuryo() {
 
       {/* 拡大モーダル */}
       {enlargedImage && (
-        <div onClick={() => setEnlargedImage(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', zIndex: 10000 }}>
+        <div onClick={() => setEnlargedImage(null)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '1rem', zIndex: 10000
+        }}>
           <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}>
-            <img src={enlargedImage.src} alt={enlargedImage.name} style={{ maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: 8 }} />
-            <button onClick={e => { e.stopPropagation(); setEnlargedImage(null); }} style={{ position: 'absolute', top: -40, right: 0, padding: '8px 16px', background: 'rgba(255,255,255,0.2)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: '1rem' }}><X size={20} /></button>
+            <img src={enlargedImage.src} alt={enlargedImage.name} style={{
+              maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: 8
+            }} />
+            <button onClick={e => { e.stopPropagation(); setEnlargedImage(null); }} style={{
+              position: 'absolute', top: -40, right: 0,
+              padding: '8px 16px', background: 'rgba(255,255,255,0.2)',
+              color: '#fff', border: 'none', borderRadius: 4,
+              cursor: 'pointer', fontSize: '1rem'
+            }}>
+              <X size={20} />
+            </button>
           </div>
         </div>
       )}
