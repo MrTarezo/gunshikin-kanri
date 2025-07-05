@@ -1,3 +1,6 @@
+
+// Syokuryo.jsx - ドアポケットを冷蔵室右に縦長配置（上・中・下・野菜室の横）
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Image, X, Trash2 } from 'lucide-react';
 import { generateClient } from 'aws-amplify/api';
@@ -11,6 +14,7 @@ const fridgeLocations = [
   { id: 'fridge-top', name: '冷蔵室上段', icon: '🥛' },
   { id: 'fridge-middle', name: '冷蔵室中段', icon: '🥗' },
   { id: 'fridge-bottom', name: '冷蔵室下段', icon: '🍖' },
+  { id: 'vegetable', name: '野菜室', icon: '🥕' },
   { id: 'freezer-top', name: '冷凍庫上段', icon: '❄️' },
   { id: 'freezer-middle', name: '冷凍庫中段', icon: '🧊' },
   { id: 'freezer-bottom', name: '冷凍庫下段', icon: '🍦' },
@@ -50,26 +54,33 @@ export default function Syokuryo() {
   const fetchFridgeItems = async () => {
     try {
       const res = await client.graphql({ query: listFridgeItems });
-      const items = res.data.listFridgeItems.items.filter(item => item.isUrgent);
-      setUrgentItems(items);
+      const items = res.data.listFridgeItems.items;
+  
+      // ⚠️ isUrgent=trueのものだけ urgentItems に
+      const urgents = items.filter(item => item.isUrgent);
+      setUrgentItems(urgents);
+  
+      // ✅ location と image があるすべてのレコードを imageMap に登録
       const imgMap = {};
       items.forEach(item => {
-        if (item.location && item.image) imgMap[item.location] = item.image;
+        if (item.location && item.image) {
+          imgMap[item.location] = item.image;
+        }
       });
       setLocationImages(imgMap);
     } catch (err) {
       console.error('取得エラー:', err);
     }
   };
-
-  const handleImageCapture = async file => {
-    if (!file || !selectedLocationForPhoto) return;
-    try {
-      // ファイル名を安全に変換
-      const safeName = file.name.replace(/\s/g, '_').replace(/[^\w.-]/g, '');
-      const filename = `fridge/${selectedLocationForPhoto}_${Date.now()}_${safeName}`;
   
-      // S3 にアップロード
+
+  const handleImageCapture = async (file) => {
+    if (!file || !selectedLocationForPhoto) return;
+  
+    const filename = `fridge/${selectedLocationForPhoto}.jpg`;
+  
+    try {
+      // 上書きアップロード
       const result = await uploadData({
         path: filename,
         data: file,
@@ -78,22 +89,25 @@ export default function Syokuryo() {
           contentType: file.type,
         },
       });
-      const key = result?.path ?? filename;
-      console.log('✅ アップロード完了:', key);
   
-      // ステートに反映（即時表示用）
-      setLocationImages(prev => ({ ...prev, [selectedLocationForPhoto]: key }));
+      console.log('✅ 上書きアップロード完了:', result.path);
   
-      // GraphQL に保存（永続化用）
+      // 表示用stateに反映
+      setLocationImages(prev => ({
+        ...prev,
+        [selectedLocationForPhoto]: filename,
+      }));
+  
+      // GraphQL登録（先に同じlocationがあってもそのまま追加）
       await client.graphql({
         query: createFridgeItem,
         variables: {
           input: {
             name: '写真のみ',
             location: selectedLocationForPhoto,
-            image: key,
+            image: filename,
             isUrgent: false,
-            addedDate: new Date().toISOString().split('T')[0], // ← これを追加
+            addedDate: new Date().toISOString().split('T')[0],
           }
         }
       });
@@ -101,56 +115,27 @@ export default function Syokuryo() {
       setSelectedLocationForPhoto('');
     } catch (error) {
       console.error('画像アップロード失敗:', error);
-      if (error.errors) {
-        console.error('GraphQLエラー詳細:', JSON.stringify(error.errors, null, 2));
-        alert('登録エラー: ' + error.errors[0]?.message);
-      } else {
-        alert('不明なエラーで登録に失敗しました');
-      }
+      alert('登録エラー: ' + (error.errors?.[0]?.message || ''));
     }
   };
   
+
   const onFileChange = e => {
     const file = e.target.files?.[0];
     handleImageCapture(file);
   };
 
-  const renderLocationImage = (locId, locName, tall = false) => {
+  const renderLocationImage = (locId, locName, tall = true) => {
     const src = imageURLs[locId];
     if (src) {
       return (
         <div style={{ position: 'relative', cursor: 'pointer' }}>
           <img
             src={src}
-            alt={`${locName}の写真`}
+            alt={locName}
             onClick={() => setEnlargedImage({ src, name: locName })}
-            style={{
-              width: '100%',
-              height: tall ? 180 : 100,
-              objectFit: 'cover',
-              borderRadius: 4,
-            }}
+            style={{ width: '100%', height: tall ? 180 : 100, objectFit: 'cover', borderRadius: 4 }}
           />
-          <button
-            onClick={e => {
-              e.stopPropagation();
-              setLocationImages(prev => ({ ...prev, [locId]: undefined }));
-            }}
-            style={{
-              position: 'absolute',
-              top: 4,
-              right: 4,
-              padding: '2px 6px',
-              background: 'rgba(0,0,0,0.7)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-            }}
-          >
-            ×
-          </button>
         </div>
       );
     }
@@ -167,137 +152,105 @@ export default function Syokuryo() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f5f5f5',
+          background: '#f0f0f0',
           borderRadius: 4,
           border: '1px dashed #ccc',
-          color: '#888',
           cursor: 'pointer',
         }}
       >
         <Camera size={24} />
-        <div style={{ marginTop: 4 }}>写真なし</div>
+        <div style={{ fontSize: '0.8rem', marginTop: 4 }}>写真なし</div>
       </div>
     );
   };
 
-  const handleAddUrgentItem = async () => {
-    if (!newItemName.trim()) return;
-    try {
-      const input = {
-        name: newItemName.trim(),
-        addedDate: new Date().toISOString().split('T')[0],
-        isUrgent: true,
-        location: '',
-        image: '',
-      };
-      const res = await client.graphql({
-        query: createFridgeItem,
-        variables: { input },
-      });
-      setUrgentItems(prev => [...prev, res.data.createFridgeItem]);
-      setNewItemName('');
-    } catch (err) {
-      console.error('追加失敗:', err);
-      alert('登録に失敗しました');
-    }
-  };
-  
-
-
   return (
-    <div style={{ padding: '1rem', maxWidth: 480, margin: '0 auto', background: '#fff', borderRadius: 12, boxShadow: '0 0 8px rgba(0,0,0,0.1)' }}>
+    <div style={{ padding: '1rem', maxWidth: 480, margin: '0 auto' }}>
       <h2>⚠️ 食べないと危険なリスト</h2>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-        <input value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="例：賞味期限切れチーズ" style={{ flex: 1 }} />
-        <button onClick={handleAddUrgentItem}>追加</button>
+        <input value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="例：古いチーズ" style={{ flex: 1 }} />
+        <button onClick={() => {
+          const input = {
+            name: newItemName.trim(),
+            addedDate: new Date().toISOString().split('T')[0],
+            isUrgent: true,
+            location: '',
+            image: '',
+          };
+          client.graphql({ query: createFridgeItem, variables: { input } }).then(res => {
+            setUrgentItems(prev => [...prev, res.data.createFridgeItem]);
+            setNewItemName('');
+          });
+        }}>追加</button>
       </div>
       <ul>
         {urgentItems.map(item => (
-          <li key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+          <li key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
             {item.name}
-            <button onClick={() => handleDeleteUrgentItem(item.id)}><Trash2 size={16} /></button>
+            <button onClick={() => {
+              client.graphql({ query: deleteFridgeItem, variables: { input: { id: item.id } } }).then(() =>
+                setUrgentItems(prev => prev.filter(i => i.id !== item.id))
+              );
+            }}><Trash2 size={16} /></button>
           </li>
         ))}
       </ul>
 
       <h2 style={{ marginTop: '2rem' }}>🧊 冷蔵庫ビュー</h2>
-
-      {/* 冷蔵室とドアポケット */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        justifyContent: 'center',
-        alignItems: 'stretch',
-      }}>
-        {/* 冷蔵室 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, minWidth: 250 }}>
-          {fridgeLocations.filter(l => l.id.includes('fridge')).map(loc => (
-            <div key={loc.id} style={{ border: '1px solid #ccc', borderRadius: 8, padding: '0.5rem', background: '#fff' }}>
+      <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {fridgeLocations.filter(l => ['fridge-top', 'fridge-middle', 'fridge-bottom', 'vegetable'].includes(l.id)).map(loc => (
+            <div key={loc.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>{loc.icon} {loc.name}</span>
-                <button onClick={() => { setSelectedLocationForPhoto(loc.id); fileInputRef.current?.click(); }}><Camera size={16} /></button>
+                <button onClick={() => { setSelectedLocationForPhoto(loc.id); fileInputRef.current?.click(); }}>
+                  <Camera size={16} />
+                </button>
               </div>
               {renderLocationImage(loc.id, loc.name, true)}
             </div>
           ))}
         </div>
-
-        {/* ドアポケット */}
-        <div style={{
-          width: 180,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          border: '2px dashed #888',
-          borderRadius: 8,
-          padding: '0.5rem',
-          background: '#f4f4f4',
-          boxShadow: 'inset -2px 0 4px rgba(0,0,0,0.05)',
-        }}>
-          <h3 style={{ textAlign: 'center' }}>{doorPocket.icon} ドアポケット</h3>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={() => { setSelectedLocationForPhoto(doorPocket.id); fileInputRef.current?.click(); }}><Camera size={16} /></button>
-          </div>
+        <div style={{ width: 160 }}>
+          <div style={{ textAlign: 'center', marginBottom: 4 }}>{doorPocket.icon} {doorPocket.name}</div>
+          <button style={{ float: 'right' }} onClick={() => {
+            setSelectedLocationForPhoto(doorPocket.id);
+            fileInputRef.current?.click();
+          }}>
+            <Camera size={16} />
+          </button>
           {renderLocationImage(doorPocket.id, doorPocket.name, true)}
         </div>
       </div>
 
-      <hr style={{ borderTop: '1px dashed #aaa', margin: '2rem 0' }} />
-
-      {/* 冷凍庫 */}
-      <div style={{ marginTop: '2rem' }}>
-        {fridgeLocations.filter(l => l.id.includes('freezer')).map(loc => (
-          <div key={loc.id} style={{ border: '1px solid #ccc', borderRadius: 8, padding: '0.5rem', marginBottom: '1rem', backgroundColor: '#eef6ff' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>{loc.icon} {loc.name}</span>
-              <button onClick={() => { setSelectedLocationForPhoto(loc.id); fileInputRef.current?.click(); }}><Camera size={16} /></button>
-            </div>
-            {renderLocationImage(loc.id, loc.name, true)}
+      <h3 style={{ marginTop: '2rem' }}>❄️ 冷凍庫</h3>
+      {fridgeLocations.filter(l => l.id.startsWith('freezer')).map(loc => (
+        <div key={loc.id} style={{ marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>{loc.icon} {loc.name}</span>
+            <button onClick={() => { setSelectedLocationForPhoto(loc.id); fileInputRef.current?.click(); }}>
+              <Camera size={16} />
+            </button>
           </div>
-        ))}
-      </div>
+          {renderLocationImage(loc.id, loc.name, true)}
+        </div>
+      ))}
 
       <input type="file" ref={fileInputRef} onChange={onFileChange} accept="image/*" capture="environment" style={{ display: 'none' }} />
 
-      {/* 拡大モーダル */}
       {enlargedImage && (
         <div onClick={() => setEnlargedImage(null)} style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '1rem', zIndex: 10000
+          zIndex: 9999,
         }}>
-          <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}>
-            <img src={enlargedImage.src} alt={enlargedImage.name} style={{
-              maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: 8
-            }} />
+          <div style={{ position: 'relative' }}>
+            <img src={enlargedImage.src} alt={enlargedImage.name} style={{ maxHeight: '80vh', maxWidth: '90vw' }} />
             <button onClick={e => { e.stopPropagation(); setEnlargedImage(null); }} style={{
-              position: 'absolute', top: -40, right: 0,
-              padding: '8px 16px', background: 'rgba(255,255,255,0.2)',
-              color: '#fff', border: 'none', borderRadius: 4,
-              cursor: 'pointer', fontSize: '1rem'
+              position: 'absolute', top: -40, right: 0, color: '#fff',
+              background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 4, padding: '0.5rem 1rem'
             }}>
-              <X size={20} />
+              <X />
             </button>
           </div>
         </div>
