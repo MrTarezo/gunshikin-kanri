@@ -1,6 +1,3 @@
-
-// Syokuryo.jsx - ドアポケットを冷蔵室右に縦長配置（上・中・下・野菜室の横）
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Image, X, Trash2 } from 'lucide-react';
 import { generateClient } from 'aws-amplify/api';
@@ -8,6 +5,7 @@ import { uploadData, getUrl } from '@aws-amplify/storage';
 import { listFridgeItems } from '../graphql/queries';
 import { createFridgeItem, deleteFridgeItem } from '../graphql/mutations';
 import imageCompression from 'browser-image-compression';
+
 
 const client = generateClient();
 
@@ -82,19 +80,19 @@ export default function Syokuryo() {
     }
   };
   
-
   const handleImageCapture = async (file) => {
     if (!file || !selectedLocationForPhoto) return;
   
     const basePath = `fridge/${selectedLocationForPhoto}`;
     try {
-      // 1️⃣ 圧縮バージョン
+      // 1️⃣ 圧縮プレビュー生成
       const compressed = await imageCompression(file, {
         maxSizeMB: 0.2,
         maxWidthOrHeight: 800,
         useWebWorker: true,
       });
   
+      // 2️⃣ S3アップロード（プレビュー + オリジナル）
       await uploadData({
         path: `${basePath}_preview.jpg`,
         data: compressed,
@@ -104,7 +102,6 @@ export default function Syokuryo() {
         },
       });
   
-      // 2️⃣ オリジナルもそのままアップ
       await uploadData({
         path: `${basePath}_original.jpg`,
         data: file,
@@ -114,32 +111,52 @@ export default function Syokuryo() {
         },
       });
   
-      // 状態更新
-      setLocationImages(prev => ({
-        ...prev,
-        [selectedLocationForPhoto]: {
-          preview: `${basePath}_preview.jpg`,
-          original: `${basePath}_original.jpg`,
-        },
-      }));
+      // 3️⃣ DynamoDBに create or update
+      const listRes = await client.graphql({ query: listFridgeItems });
+      const existingItem = listRes.data.listFridgeItems.items.find(
+        (item) => item.location === selectedLocationForPhoto
+      );
   
-      // GraphQL登録（元画像パスを保存）
-      await client.graphql({
-        query: createFridgeItem,
-        variables: {
-          input: {
-            name: '写真のみ',
-            location: selectedLocationForPhoto,
-            image: `${basePath}_original.jpg`, // ← モデルは元画像基準で
-            isUrgent: false,
-            addedDate: new Date().toISOString().split('T')[0],
+      const input = {
+        name: '写真のみ',
+        location: selectedLocationForPhoto,
+        image: `${basePath}_original.jpg`,
+        isUrgent: false,
+        addedDate: new Date().toISOString().split('T')[0],
+      };
+  
+      if (existingItem) {
+        // update
+        await client.graphql({
+          query: updateFridgeItem,
+          variables: {
+            input: {
+              id: existingItem.id,
+              ...input,
+            },
           },
-        },
-      });
+        });
+      } else {
+        // create
+        await client.graphql({
+          query: createFridgeItem,
+          variables: { input },
+        });
+      }
+  
+      // 4️⃣ 表示用URL取得して反映
       try {
         const previewUrl = await getUrl({ path: `${basePath}_preview.jpg`, options: { accessLevel: 'protected' } });
         const originalUrl = await getUrl({ path: `${basePath}_original.jpg`, options: { accessLevel: 'protected' } });
-      
+  
+        setLocationImages(prev => ({
+          ...prev,
+          [selectedLocationForPhoto]: {
+            preview: `${basePath}_preview.jpg`,
+            original: `${basePath}_original.jpg`,
+          },
+        }));
+  
         setImageURLs(prev => ({
           ...prev,
           [selectedLocationForPhoto]: {
@@ -150,13 +167,14 @@ export default function Syokuryo() {
       } catch (e) {
         console.warn('プレビューURL取得失敗', e);
       }
-      
+  
       setSelectedLocationForPhoto('');
     } catch (error) {
       console.error('画像アップロード失敗:', error);
       alert('登録エラー: ' + (error.errors?.[0]?.message || ''));
     }
   };
+  
     
 
   const onFileChange = e => {
