@@ -65,9 +65,18 @@ export default function Syokuryo() {
   const handleImageCapture = async file => {
     if (!file || !selectedLocationForPhoto) return;
     try {
-      const filename = `fridge/${selectedLocationForPhoto}_${Date.now()}_${file.name}`;
-      const result = await uploadData({ path: filename, data: file, options: { accessLevel: 'protected', contentType: file.type } });
+      const safeName = file.name.replace(/\s/g, '_').replace(/[^\w.-]/g, '');
+      const filename = `fridge/${selectedLocationForPhoto}_${Date.now()}_${safeName}`;
+      const result = await uploadData({
+        path: filename,
+        data: file,
+        options: {
+          accessLevel: 'protected',
+          contentType: file.type,
+        },
+      });
       const key = result?.path ?? filename;
+      console.log('画像アップロード完了:', key);
       setLocationImages(prev => ({ ...prev, [selectedLocationForPhoto]: key }));
       setSelectedLocationForPhoto('');
     } catch (error) {
@@ -75,7 +84,7 @@ export default function Syokuryo() {
       alert('画像のアップロードに失敗しました');
     }
   };
-
+  
   const onFileChange = e => {
     const file = e.target.files?.[0];
     handleImageCapture(file);
