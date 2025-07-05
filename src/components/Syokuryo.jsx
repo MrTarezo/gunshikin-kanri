@@ -7,6 +7,7 @@ import { createFridgeItem, deleteFridgeItem } from '../graphql/mutations';
 import imageCompression from 'browser-image-compression';
 
 
+
 const client = generateClient();
 
 const fridgeLocations = [
@@ -29,6 +30,7 @@ export default function Syokuryo() {
   const [selectedLocationForPhoto, setSelectedLocationForPhoto] = useState('');
   const [enlargedImage, setEnlargedImage] = useState(null);
   const fileInputRef = useRef(null);
+  const [fridgeItems, setFridgeItems] = useState([]); 
 
   useEffect(() => { fetchFridgeItems(); }, []);
 
@@ -59,6 +61,7 @@ export default function Syokuryo() {
     try {
       const res = await client.graphql({ query: listFridgeItems });
       const items = res.data.listFridgeItems.items;
+      setFridgeItems(items);
   
       // ⚠️ isUrgent=trueのものだけ urgentItems に
       const urgents = items.filter(item => item.isUrgent);
@@ -79,6 +82,11 @@ export default function Syokuryo() {
       console.error('取得エラー:', err);
     }
   };
+
+  const locationDataMap = {};
+  fridgeItems.forEach(item => {
+    locationDataMap[item.location] = item;
+  });
   
   const handleImageCapture = async (file) => {
     if (!file || !selectedLocationForPhoto) return;
@@ -229,9 +237,6 @@ export default function Syokuryo() {
       );
     }
     
-    
-    
-  
     return (
       <div
         onClick={() => {
@@ -297,7 +302,19 @@ export default function Syokuryo() {
           {fridgeLocations.filter(l => ['fridge-top', 'fridge-middle', 'fridge-bottom', 'vegetable'].includes(l.id)).map(loc => (
             <div key={loc.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>{loc.icon} {loc.name}</span>
+              <span>
+            {loc.icon} {loc.name}
+            {locationDataMap[loc.id]?.addedDate && (
+              <>（{locationDataMap[loc.id].addedDate}）</>
+            )}
+          </span>
+
+
+
+
+
+
+
               </div>
               {renderLocationImage(loc.id, loc.name, true)}
             </div>
