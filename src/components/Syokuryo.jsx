@@ -211,7 +211,7 @@ const FridgeInventoryApp = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
       {/* ヘッダー */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-40">
+      <div className="bg-white shadow-md border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
@@ -277,6 +277,7 @@ const FridgeInventoryApp = () => {
                       <h3 className="font-semibold text-lg flex items-center gap-2">
                         <span className="text-2xl">{location.icon}</span>
                         {location.name}
+                        <span className="ml-1 text-sm text-gray-500">({locationItems.length})</span>
                       </h3>
                       <div className="flex gap-1">
                         <button
@@ -362,7 +363,7 @@ const FridgeInventoryApp = () => {
                   const days = getDaysUntilExpiry(item.expiryDate);
                   const location = locations.find(l => l.id === item.location);
                   return (
-                    <div key={item.id} className="p-4 hover:bg-gray-50 transition-colors">
+                    <div key={item.id} className="p-4 hover:bg-gray-50 transition-colors even:bg-gray-50">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
