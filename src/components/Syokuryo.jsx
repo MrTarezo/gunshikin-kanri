@@ -125,8 +125,11 @@ export default function Syokuryo() {
     handleImageCapture(file);
   };
 
-  const renderLocationImage = (locId, locName, tall = true) => {
+  const renderLocationImage = (locId, locName, type = 'normal') => {
     const src = imageURLs[locId];
+  
+    const height = type === 'door' ? 300 : 180;     // ← 縦長表示！
+    const minHeight = type === 'door' ? 250 : 100;  // ← プレースホルダも対応
   
     if (src) {
       return (
@@ -134,13 +137,14 @@ export default function Syokuryo() {
           <img
             src={src}
             alt={locName}
-            onDoubleClick={() => {
+            onContextMenu={(e) => {
+              e.preventDefault();
               setSelectedLocationForPhoto(locId);
               fileInputRef.current?.click();
             }}
             style={{
               width: '100%',
-              height: tall ? 180 : 100,
+              height,
               objectFit: 'cover',
               borderRadius: 4,
             }}
@@ -156,7 +160,8 @@ export default function Syokuryo() {
           fileInputRef.current?.click();
         }}
         style={{
-          height: tall ? 180 : 100,
+          height,
+          minHeight,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -172,6 +177,7 @@ export default function Syokuryo() {
       </div>
     );
   };
+  
   
 
   return (
@@ -218,26 +224,20 @@ export default function Syokuryo() {
             </div>
           ))}
         </div>
-        <div style={{ width: 160 }}>
-          <div style={{ textAlign: 'center', marginBottom: 4 }}>{doorPocket.icon} {doorPocket.name}</div>
-          <button style={{ float: 'right' }} onClick={() => {
-            setSelectedLocationForPhoto(doorPocket.id);
-            fileInputRef.current?.click();
-          }}>
-            <Camera size={16} />
-          </button>
+        <div style={{ width: 160, alignSelf: 'flex-start' }}>
+          <div style={{ textAlign: 'center', marginBottom: 4 }}>
+            {doorPocket.icon} {doorPocket.name}
+          </div>
           {renderLocationImage(doorPocket.id, doorPocket.name, true)}
         </div>
       </div>
 
+      <hr style={{ marginTop: '2rem', marginBottom: '1rem', border: 'none', borderTop: '2px dashed #ccc' }} />
       <h3 style={{ marginTop: '2rem' }}>❄️ 冷凍庫</h3>
       {fridgeLocations.filter(l => l.id.startsWith('freezer')).map(loc => (
         <div key={loc.id} style={{ marginBottom: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>{loc.icon} {loc.name}</span>
-            <button onClick={() => { setSelectedLocationForPhoto(loc.id); fileInputRef.current?.click(); }}>
-              <Camera size={16} />
-            </button>
           </div>
           {renderLocationImage(loc.id, loc.name, true)}
         </div>
