@@ -9,8 +9,8 @@ import imageCompression from 'browser-image-compression';
 const client = generateClient();
 
 const fridgeLocations = [
-  { id: 'fridge-main', name: '冷蔵室', icon: '🍖' },
-  { id: 'vegetable', name: '野菜室', icon: '🥗' },
+  { id: 'fridge-main', name: '冷蔵室', icon: '🍱' },
+  { id: 'vegetable', name: '野菜室', icon: '🥕' },
   { id: 'freezer-top', name: '上段', icon: '🍦' },
   { id: 'freezer-middle', name: '中段', icon: '❄️' },
   { id: 'freezer-bottom', name: '下段', icon: '🧊' },
@@ -253,7 +253,7 @@ export default function Syokuryo() {
         ))}
       </ul>
 
-      <h2 style={{ marginTop: '1.5rem', fontSize: '1.3rem', margin: '1rem 0 0.5rem 0', textAlign: 'center', background: '#e3f2fd', padding: '0.5rem', borderRadius: '8px', color: '#1976d2' }}> 冷蔵庫ビュー </h2>
+      <h2 style={{ marginTop: '1.5rem', fontSize: '1.3rem', margin: '1rem 0 0.5rem 0', textAlign: 'center', background: '#cfd8dc', padding: '0.5rem', borderRadius: '8px', color: '#455a64' }}>❄️ 冷蔵庫ビュー ❄️</h2>
       <div style={{ display: 'flex', justifyContent: 'center', gap: '0.25rem', padding: '0' }}>
         {/* 冷蔵室 */}
         <div style={{
@@ -262,10 +262,10 @@ export default function Syokuryo() {
           gap: '0.5rem',
           flex: 1,
           maxWidth: 300,
-          border: '3px solid #90caf9',
+          border: '3px solid #78909c',
           borderRadius: 12,
           padding: '0.5rem',
-          background: 'linear-gradient(to bottom, #f5f5f5 0%, #e3f2fd 100%)',
+          background: 'linear-gradient(to bottom, #eceff1 0%, #cfd8dc 100%)',
           boxShadow: '0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
         }}>
       {['fridge-main', 'vegetable'].map(id => {
@@ -294,10 +294,10 @@ export default function Syokuryo() {
           flexDirection: 'column',
           alignItems: 'center',
           width: 120,
-          border: '3px solid #64b5f6',
+          border: '3px solid #607d8b',
           borderRadius: 12,
           padding: '0.5rem',
-          background: 'linear-gradient(to bottom, #fafafa 0%, #e1f5fe 100%)',
+          background: 'linear-gradient(to bottom, #f5f5f5 0%, #b0bec5 100%)',
           boxShadow: '0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
         }}>
           {/* タイトル */}
@@ -327,11 +327,11 @@ export default function Syokuryo() {
         .map(loc => (
           <div key={loc.id} style={{ 
             marginBottom: '1rem',
-            border: '3px solid #90caf9',
+            border: '3px solid #64b5f6',
             borderRadius: 12,
             padding: '0.5rem',
-            background: 'linear-gradient(to bottom, #e8f5e9 0%, #c5e1a5 100%)',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
+            background: 'linear-gradient(to bottom, #e3f2fd 0%, #bbdefb 100%)',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.9)'
           }}>
             {/* タイトル */}
             <div style={{ fontWeight: 'bold' }}>
