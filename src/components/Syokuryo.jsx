@@ -7,6 +7,7 @@ import { generateClient } from 'aws-amplify/api';
 import { uploadData, getUrl } from '@aws-amplify/storage';
 import { listFridgeItems } from '../graphql/queries';
 import { createFridgeItem, deleteFridgeItem } from '../graphql/mutations';
+import imageCompression from 'browser-image-compression';
 
 const client = generateClient();
 
@@ -80,25 +81,30 @@ export default function Syokuryo() {
     const filename = `fridge/${selectedLocationForPhoto}.jpg`;
   
     try {
-      // 上書きアップロード
+      // ✅ 圧縮オプション
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.2,               // 最大 200KB まで
+        maxWidthOrHeight: 800,       // 最大辺800px（スマホには十分）
+        useWebWorker: true,          // 非同期処理でUIブロック回避
+      });
+  
+      // ✅ アップロードは圧縮後データを使う
       const result = await uploadData({
         path: filename,
-        data: file,
+        data: compressed,
         options: {
           accessLevel: 'protected',
-          contentType: file.type,
+          contentType: compressed.type,
         },
       });
   
       console.log('✅ 上書きアップロード完了:', result.path);
   
-      // 表示用stateに反映
       setLocationImages(prev => ({
         ...prev,
         [selectedLocationForPhoto]: filename,
       }));
   
-      // GraphQL登録（先に同じlocationがあってもそのまま追加）
       await client.graphql({
         query: createFridgeItem,
         variables: {
@@ -137,8 +143,8 @@ export default function Syokuryo() {
           <img
             src={src}
             alt={locName}
-            onContextMenu={(e) => {
-              e.preventDefault();
+            onClick={() => {
+              // 📸 タップでカメラ起動（再撮影）
               setSelectedLocationForPhoto(locId);
               fileInputRef.current?.click();
             }}
@@ -149,9 +155,30 @@ export default function Syokuryo() {
               borderRadius: 4,
             }}
           />
+          {/* 🔍 拡大表示ボタン */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // カメラ起動とバッティング防止
+              setEnlargedImage({ src, name: locName });
+            }}
+            style={{
+              position: 'absolute',
+              top: 4,
+              right: 4,
+              background: 'rgba(255,255,255,0.7)',
+              border: 'none',
+              borderRadius: '50%',
+              padding: '0.3rem',
+              cursor: 'pointer',
+            }}
+          >
+            <Image size={16} />
+          </button>
         </div>
       );
     }
+    
+    
   
     return (
       <div
