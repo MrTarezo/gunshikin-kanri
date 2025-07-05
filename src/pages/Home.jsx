@@ -9,7 +9,8 @@ import EditModal from '../components/EditModal';
 import MonthlyChart from '../components/MonthlyChart';
 import CategoryPieChart from '../components/CategoryPieChart';
 import ExpenseCalendar from '../components/ExpenseCalendar';
-import TodoList from '../components/TodoList'; // 👈 追加
+import TodoList from '../components/TodoList';
+import FridgeInventory from '../components/Syokuryo'; // 👈 追加
 import Modal from 'react-modal';
 
 const client = generateClient();
@@ -28,7 +29,8 @@ export default function Home({ nickname }) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [showPieChart, setShowPieChart] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [showTodo, setShowTodo] = useState(false); // 👈 追加
+  const [showTodo, setShowTodo] = useState(false);
+  const [showFridge, setShowFridge] = useState(false); // 👈 追加
 
   useEffect(() => {
     fetchExpenses();
@@ -132,6 +134,7 @@ export default function Home({ nickname }) {
           setShowPieChart(prev => !prev);
           setShowCalendar(false);
           setShowTodo(false);
+          setShowFridge(false);
         }}>
           {showPieChart ? '◀' : '📈分析'}
         </button>
@@ -139,6 +142,7 @@ export default function Home({ nickname }) {
           setShowCalendar(prev => !prev);
           setShowPieChart(false);
           setShowTodo(false);
+          setShowFridge(false);
         }}>
           {showCalendar ? '◀' : '📅暦'}
         </button>
@@ -146,13 +150,22 @@ export default function Home({ nickname }) {
           setShowTodo(prev => !prev);
           setShowPieChart(false);
           setShowCalendar(false);
+          setShowFridge(false);
         }}>
           {showTodo ? '◀' : '✅タスク'}
+        </button>
+        <button onClick={() => {
+          setShowFridge(prev => !prev);
+          setShowPieChart(false);
+          setShowCalendar(false);
+          setShowTodo(false);
+        }}>
+          {showFridge ? '◀' : '🧊冷蔵庫'}
         </button>
       </div>
 
       {/* フィルター・精算 */}
-      {!showTodo && (
+      {!showTodo && !showFridge && (
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -196,6 +209,8 @@ export default function Home({ nickname }) {
         <ExpenseCalendar expenses={filteredExpenses} />
       ) : showTodo ? (
         <TodoList nickname={nickname} />
+      ) : showFridge ? (
+        <FridgeInventory />
       ) : (
         <>
           <ExpenseTable
